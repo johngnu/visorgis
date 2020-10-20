@@ -122,7 +122,7 @@
                         <figure class="highcharts-figure">
                             <div id="container"></div>
                             <p class="highcharts-description">
-                                 POBLACIÓN EMPADRONADA POR SEXO, SEGÚN GRUPO DE EDAD
+                                POBLACIÓN EMPADRONADA POR SEXO, SEGÚN GRUPO DE EDAD
                             </p>
                         </figure>
                     </div>
@@ -132,7 +132,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="modal fade" id="notFoundDialog" tabindex="-1" role="dialog" aria-labelledby="notFoundDialog" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -300,8 +300,8 @@
         domain.objects.popup = function (feature, map) {
             var predioDetails = '<div class="card-content">';
             for (var key in feature.data) {
-                predioDetails += '<strong>' + key + ': '+ feature.data[key] +'</strong><br>';
-            }    
+                predioDetails += '<strong>' + key + ': ' + feature.data[key] + '</strong><br>';
+            }
 
             predioDetails += '</div>';
             // info popup
@@ -334,9 +334,9 @@
         };
         // Draw controls acitivate
         domain.objects.switchControl = function (element) {
-            for(var key in domain.objects.drawControls) {
+            for (var key in domain.objects.drawControls) {
                 var control = domain.objects.drawControls[key];
-                if(element === key) {
+                if (element === key) {
                     control.activate();
                 } else {
                     control.deactivate();
@@ -376,7 +376,7 @@
                     }
                 }
             });
-            
+
             domain.objects.imap.addControl(control);
             domain.objects.control = control;
         };
@@ -402,10 +402,10 @@
 
             // Data Layers
             options.layers.forEach(function (item, index) {
-                if(index === 0) {
+                if (index === 0) {
                     domain.objects.activeSLayer = item;
                 }
-                var nl = domain.objects.addDataLayer(item);                
+                var nl = domain.objects.addDataLayer(item);
                 map.addLayer(nl);
                 options.layers[index].idLayer = nl.id;
             });
@@ -415,122 +415,118 @@
             // Work layers
             this.canvas = new OpenLayers.Layer.Vector("canvas", {
                 displayInLayerSwitcher: false//,
-                //styleMap: domain.objects.styles
+                        //styleMap: domain.objects.styles
             });
             map.addLayer(this.canvas);
             domain.objects.canvas = this.canvas;
-            
+
             this.dynamicMeasure = new OpenLayers.Control.DynamicMeasure(OpenLayers.Handler.Polygon, {
-                persist: true, 
+                persist: true,
                 drawingLayer: this.canvas,
                 geodesic: true,
                 maxSegments: null,
                 keep: true
             });
             this.canvas.events.on({
-                featureadded: function(e) {
+                featureadded: function (e) {
                     var feature = e.feature;
                     feature.geometry.transform(
-                        new OpenLayers.Projection("EPSG:900913"),
-                        new OpenLayers.Projection("EPSG:4326")
-                    );  
-                    // console.log(feature.geometry.toString());
+                            new OpenLayers.Projection("EPSG:900913"),
+                            new OpenLayers.Projection("EPSG:4326")
+                            );
                     $.ajax({
                         url: '<c:url value="/visor/ficha/selected"/>',
                         type: "GET",
                         data: {geom: feature.geometry.toString()},
                         success: function (data) {
-                            if(data.success) {
+                            if (data.success) {
                                 // console.log(data.data);
                                 var ids = new Array();
                                 data.data.forEach(function (item, index) {
                                     var f = domain.objects.featureFromText(item.geom);
                                     domain.objects.selectFeature(map, f, false);
                                     ids.push(item.idmanzana);
-                                });    
-                                
+                                });
+
                                 $('#moreinfo').modal('toggle');
                                 $.ajax({
                                     url: '<c:url value="/visor/ficha/data"/>',
                                     type: "POST",
                                     data: {ids: JSON.stringify(ids)},
-                                    dataType: 'json',      
-                                    success: function (data) {                                        
-                                        console.log(data);
+                                    dataType: 'json',
+                                    success: function (data) {
+
                                         var datas = data.data;
                                         var serie_data = [
-                                                datas.pob_edad_0003, 
-                                                datas.pob_edad_0405, 
-                                                datas.pob_edad_0619, 
-                                                datas.pob_edad_2039, 
-                                                datas.pob_edad_4059, 
-                                                datas.pob_edad_60mas
-                                            ];
-                                        console.log(serie_data);    
+                                            datas.pob_edad_0003,
+                                            datas.pob_edad_0405,
+                                            datas.pob_edad_0619,
+                                            datas.pob_edad_2039,
+                                            datas.pob_edad_4059,
+                                            datas.pob_edad_60mas
+                                        ];
+
                                         var time = new Date().getTime();
-                                        $("#docContent").html('<embed src="<c:url value="/visor/ficha/pdf?time="/>'+ time +'" width="100%" height="200">')
-                                        Highcharts.chart('g_container', {
-                                          chart: {
-                                            type: 'column',
-                                            options3d: {
-                                              enabled: true,
-                                              alpha: 10,
-                                              beta: 25,
-                                              depth: 70
-                                            }
-                                          },
-                                          title: {
-                                            text: 'Resumen'
-                                          },
-                                          subtitle: {
-                                            text: 'POBLACIÓN EMPADRONADA POR SEXO, SEGÚN GRUPO DE EDAD'
-                                          },
-                                          plotOptions: {
-                                            column: {
-                                              depth: 25
-                                            }
-                                          },
-                                          xAxis: {
-                                            categories: ["0-3","4-5","6-19","20-39","40-59","60 y más"],
-                                            labels: {
-                                              skew3d: true,
-                                              style: {
-                                                fontSize: '16px'
-                                              }
-                                            }
-                                          },
-                                          yAxis: {
+                                        $("#docContent").html('<embed src="<c:url value="/visor/ficha/pdf?time="/>' + time + '" width="100%" height="200">')
+                                        Highcharts.chart('container', {
+                                            chart: {
+                                                type: 'column',
+                                                options3d: {
+                                                    enabled: true,
+                                                    alpha: 10,
+                                                    beta: 25,
+                                                    depth: 70
+                                                }
+                                            },
                                             title: {
-                                              text: null
-                                            }
-                                          },
-                                          series: [{
-                                            name: 'Edad',
-                                            data: serie_data
-                                          }]
+                                                text: 'Resumen'
+                                            },
+                                            subtitle: {
+                                                text: 'POBLACIÓN EMPADRONADA POR SEXO, SEGÚN GRUPO DE EDAD'
+                                            },
+                                            plotOptions: {
+                                                column: {
+                                                    depth: 25
+                                                }
+                                            },
+                                            xAxis: {
+                                                categories: ["0-3", "4-5", "6-19", "20-39", "40-59", "60 y más"],
+                                                labels: {
+                                                    skew3d: true,
+                                                    style: {
+                                                        fontSize: '16px'
+                                                    }
+                                                }
+                                            },
+                                            yAxis: {
+                                                title: {
+                                                    text: null
+                                                }
+                                            },
+                                            series: [{
+                                                    name: 'Edad',
+                                                    data: serie_data
+                                                }]
                                         });
                                     }
                                 });
-                                
                             }
-                            //data = JSON.parse(data);
-                            //$("#_sitmaxloc").html('<p class="category">' + data.results[0].formatted + '</p>');
                         }
                     });
                 }
             });
             // Draw control
             var drawControls = {
-                    point: new OpenLayers.Control.DrawFeature(this.canvas,
+                point: new OpenLayers.Control.DrawFeature(this.canvas,
                         OpenLayers.Handler.Point),
-                    line: new OpenLayers.Control.DrawFeature(this.canvas,
+                line: new OpenLayers.Control.DrawFeature(this.canvas,
                         OpenLayers.Handler.Path),
-                    polygon: new OpenLayers.Control.DrawFeature(this.canvas,
+                polygon: new OpenLayers.Control.DrawFeature(this.canvas,
                         OpenLayers.Handler.Polygon),
-                    select: this.dynamicMeasure
+                select: this.dynamicMeasure
             };
-            
-            for(var key in drawControls) {                
+
+            for (var key in drawControls) {
                 map.addControl(drawControls[key]);
             }
             domain.objects.drawControls = drawControls;
@@ -546,26 +542,26 @@
             map.events.register("changebaselayer", this, function (obj) {
                 // console.log(obj.layer.name);
             });
-            
+
             if (!map.getCenter()) {
                 map.zoomToMaxExtent();
             }
             map.zoomToExtent(Ext.geoBounds);
             return map;
         };
-        
-        var mainDetails = function() {
+
+        var mainDetails = function () {
             $('#moreinfo').modal('toggle');
         }
-        
+
         $(document).ready(function () {
             // N-Layers Array
             var layers = new Array();
             layers.push({label: 'Manzanas', url: 'http://localhost:8084/geoserver/censo/', layer: 'censo:t_manzanas_view', searchField: 'idmanzana'});
             //layers.push({label: 'Municipios', url: 'http://apps.icg.com.bo:8090/geoserver/elec/', layer: 'elec:municipio', searchField: 'municipio_'});
             /*layers.push({label: 'A', url: 'http://apps.icg.com.bo:8090/geoserver/elec/', layer: 'elec:municipio', searchField: 'municipio_'});
-            layers.push({label: 'B', url: 'http://apps.icg.com.bo:8090/geoserver/elec/', layer: 'elec:municipio', searchField: 'municipio_'});
-            layers.push({label: 'C', url: 'http://apps.icg.com.bo:8090/geoserver/elec/', layer: 'elec:municipio', searchField: 'municipio_'});*/
+             layers.push({label: 'B', url: 'http://apps.icg.com.bo:8090/geoserver/elec/', layer: 'elec:municipio', searchField: 'municipio_'});
+             layers.push({label: 'C', url: 'http://apps.icg.com.bo:8090/geoserver/elec/', layer: 'elec:municipio', searchField: 'municipio_'});*/
 
             // Create Map
             var map = domain.objects.mapa({layers: layers});
@@ -588,7 +584,7 @@
                     var layer = map.getLayersBy('id', $(this).val())[0];
                     map.setBaseLayer(layer);
                 });
-                
+
                 var bhtml = '';
                 swcontrol.dataLayers.forEach(function (item, index) {
                     if (index === 0) {
@@ -604,7 +600,7 @@
                     domain.objects.objectselected.removeAllFeatures();
                     var lid = $(this).val();
                     swcontrol.dataLayers.forEach(function (item, index) {
-                        if (item.layer.id === lid) {                            
+                        if (item.layer.id === lid) {
                             item.layer.setVisibility(true);
                             layers.forEach(function (slayer, index) {
                                 if (slayer.idLayer === lid) {
@@ -615,9 +611,9 @@
                         } else {
                             item.layer.setVisibility(false);
                         }
-                    });                                                            
+                    });
                 });
-                
+
                 $('#search-form').submit(function () {
                     var search = $(this).find('input[name="txtSearch"]').val();
                     $.ajax({
@@ -630,22 +626,22 @@
                             "outputFormat": "application/json",
                             "srsname": "EPSG:4326",
                             "maxFeatures": 50,
-                            "CQL_FILTER": domain.objects.activeSLayer.searchField + "='"+ search +"'"
+                            "CQL_FILTER": domain.objects.activeSLayer.searchField + "='" + search + "'"
                         },
-                        success: function (response, status, xhr) {                          
+                        success: function (response, status, xhr) {
                             if (xhr.getResponseHeader('Content-Type') === 'application/json') {
                                 var geojson_format = new OpenLayers.Format.GeoJSON();
                                 var features = geojson_format.read(response, "FeatureCollection");
-                                if(features.length > 0) {
+                                if (features.length > 0) {
                                     var feature = features[0];
                                     domain.objects.selectFeature(map, feature, true);
                                     domain.objects.popup(feature, map);
                                 } else {
                                     $('#notFoundDialog').modal('toggle');
-                                } 
+                                }
                             } else {
                                 $('#notFoundDialog').modal('toggle');
-                            }              
+                            }
                         },
                         fail: function (jqXHR, textStatus) {
                             console.log("Request failed: " + textStatus);
@@ -655,14 +651,14 @@
                     return false;
                 });
             }
-            
+
             // reset all
             $('#_clear_all').on('click', function () {
                 domain.objects.canvas.removeAllFeatures();
                 domain.objects.switchControl('clear');
                 domain.objects.dynamicMeasure.emptyKeeped();
             });
-            
+
             // Draw buttons
             $('#_draw_polygon').on('click', function () {
                 domain.objects.switchControl('polygon');
@@ -672,20 +668,20 @@
             });
             $('#_draw_line').on('click', function () {
                 domain.objects.switchControl('line');
-            });            
+            });
             $('#_unselect').on('click', function () {
                 domain.objects.objectselected.removeAllFeatures();
             });
             $('#_draw_select').click(function () {
                 domain.objects.switchControl('select');
             });
-            
-            
-              
 
-           
+
+
+
+
         });
-                             
+
     </script>
 </html>
 
