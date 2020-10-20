@@ -1,5 +1,5 @@
 /*
- * ICG SRL - International Consulting Group 2017
+ * INE - Instituto Nacional de Estadistica 2020
  */
 package bo.gob.ine.web;
 
@@ -95,7 +95,7 @@ public class VisorController implements Serializable {
                     for (Map<String, Object> m : er.getListData()) {
                         vs.add(m.get(en.getKey()).toString());
                     }
-                    res.put(en.getKey(), vs.toString());
+                    res.put(en.getKey(), vs.toString().replaceAll("\\[|\\]", ""));
                 }
             }
         }
@@ -152,7 +152,49 @@ public class VisorController implements Serializable {
                     + "where idmanzana in " + paramsToIn(aids);
             EntityResult er = service.nativeQueryFind(sql);
             Map<String, Object> res = sumData(er);
-            System.out.println(res);
+            res.put("num_manzano", aids.length);
+            // vivienda
+            Integer sv = (Integer) res.get("viv_vivpart") + 
+                    (Integer) res.get("viv_vivcolec");
+            res.put("total_viv", sv);
+            // disp. energ. elec.
+            Integer eel = (Integer) res.get("viv_sb_enrg_red") + 
+                    (Integer) res.get("viv_sb_enrg_otrfuente") + 
+                    (Integer) res.get("viv_sb_enrg_notiene");
+            res.put("total_energia", eel);
+            // combustible
+            Integer com = (Integer) res.get("viv_sb_comb_gasgarraf") + 
+                    (Integer) res.get("viv_sb_comb_caneria") + 
+                    (Integer) res.get("viv_sb_comb_lenia") +
+                    (Integer) res.get("viv_sb_comb_otros");
+            res.put("total_combustible", com);
+            // Procedencia del agua
+            Integer agu = (Integer) res.get("viv_sb_agua_red") + 
+                    (Integer) res.get("viv_sb_agua_ppublica") + 
+                    (Integer) res.get("viv_sb_agua_carro") +
+                    (Integer) res.get("viv_sb_agua_pozo") +
+                    (Integer) res.get("viv_sb_agua_lluvia") +
+                    (Integer) res.get("viv_sb_agua_otros");
+            res.put("total_sb_agua", agu);
+            // Desague del servicio sanitario
+            Integer san = (Integer) res.get("viv_sb_desgu_alcant") + 
+                    (Integer) res.get("viv_sb_desgu_camsept") + 
+                    (Integer) res.get("viv_sb_desgu_pozociego") +
+                    (Integer) res.get("viv_sb_desgu_calle") +
+                    (Integer) res.get("viv_sb_desgu_quebrada") +
+                    (Integer) res.get("viv_sb_desgu_lago");
+            res.put("total_desague", san);
+            // Desague del servicio sanitario
+            Integer bas = (Integer) res.get("viv_basura_contened") + 
+                    (Integer) res.get("viv_basura_carro") + 
+                    (Integer) res.get("viv_basura_baldio") +
+                    (Integer) res.get("viv_basura_rio") +
+                    (Integer) res.get("viv_basura_queman") +
+                    (Integer) res.get("viv_basura_entierran") +
+                    (Integer) res.get("viv_basura_otros");
+            res.put("total_basura", bas);
+            // fin sumas
+            // System.out.println(res);
             os = fichaOutputStream(convertStringMap(res));
 
             data.put("data", res);
