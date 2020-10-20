@@ -282,7 +282,7 @@ public class EntityServices implements IEntityServices {
 
     public Map<String, String> tableColumnsMap(String schema, String tableName, String[] nofields) {
         List<Map<String, Object>> columns = this.tableColumns(schema, tableName);
-        Map<String, String> mapcolumns = new HashMap<String, String>();
+        Map<String, String> mapcolumns = new HashMap<>();
         for (Map<String, Object> c : columns) {
             if (!isInArray(c.get("column_name").toString(), nofields)) {
                 if (c.get("data_type").equals("USER-DEFINED")) {
@@ -337,6 +337,7 @@ public class EntityServices implements IEntityServices {
         return ntables;
     }
 
+    @Override
     public EntityResult get(String entity, Object id) {
         return this.get("public", entity, id);
     }
