@@ -64,9 +64,13 @@ public class EntityServices implements IEntityServices {
     /**
      * Generates
      *
+     * @param pkg
      * @return Un Array [] JSON de los paquetes y clases para el "treeloader"
      * del entity manager
+     * @throws java.lang.ClassNotFoundException
+     * @throws java.io.IOException
      */
+    @Override
     public List<Folder> getEntities(String pkg) throws ClassNotFoundException, IOException {
         List<Folder> folders = HeymaPakkageUtils.getFoldersFromPackage(pkg);
         return folders;
@@ -85,6 +89,7 @@ public class EntityServices implements IEntityServices {
         return elements;
     }
 
+    @Override
     public List<Entidad> getEntities() {
         List<Entidad> entities = dao.find("FROM Entidad WHERE parent = NULL");
         List<Map<String, Object>> stables = schemaTables("public");
@@ -103,6 +108,7 @@ public class EntityServices implements IEntityServices {
         return false;
     }
 
+    @Override
     public void executeSQLStatement(String sql) {
         dao.execute(sql);
     }
@@ -139,40 +145,48 @@ public class EntityServices implements IEntityServices {
         }
     }
 
+    @Override
     public List<Attribute> getAttributesFromEntity(Object entity) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
         String struct = PropertyUtils.getProperty(entity, "struct").toString();
         JSONArray jsonArray = JSONArray.fromObject(struct);
         return (List<Attribute>) JSONArray.toCollection(jsonArray, Attribute.class);
     }
 
+    @Override
     public <T> List<T> getListFromStructProperty(Object entity, Class<T> type, String lstProperty) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
         String struct = PropertyUtils.getProperty(entity, lstProperty).toString();
         JSONArray jsonArray = JSONArray.fromObject(struct);
         return (List<T>) JSONArray.toCollection(jsonArray, type);
     }
 
+    @Override
     public void setListToStructProperty(Object entity, List<? extends Object> objects, String lstProperty) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
         Gson gson = new Gson();
         PropertyUtils.setSimpleProperty(entity, lstProperty, gson.toJson(objects));
     }
 
+    @Override
     public <T> T jsonToObject(String JSON, Class<T> type) {
         Gson gson = new Gson();
         return gson.fromJson(JSON, type);
     }
 
+    @Override
     public void updateEntityStruct(Object entity) {
         dao.persist(entity);
     }
 
+    @Override
     public boolean existTable(String schema, String tablename) {
         return dao.existTable(schema, tablename);
     }
 
+    @Override
     public boolean existColumn(String schema, String tablename, String columnname) {
         return dao.existColumn(schema, tablename, columnname);
     }
 
+    @Override
     public void alterDropColumn(Attribute attr) {
         dao.execute(StatementUtil.alterDropColumn(attr));
     }
@@ -190,16 +204,19 @@ public class EntityServices implements IEntityServices {
         return le;
     }
 
+    @Override
     public void createEntity(Entidad entidad) {
         dao.persist(entidad);
         dao.execute(StatementUtil.createEntityDataBase("public", entidad.getName(), entidad.getName() + "_id"));
     }
 
+    @Override
     public List<Map<String, Object>> schemaTables(String schema) {
         String SQL = StatementUtil.getInfSchemaTables(schema);
         return dao.selectSQLMapResult(SQL);
     }
 
+    @Override
     public List<Map<String, Object>> tableColumns(String schema, String tableName) {
         String[] fields = new String[]{"ordinal_position",
             "column_name",
@@ -217,8 +234,9 @@ public class EntityServices implements IEntityServices {
         return dao.find(SQL, sf.getValues());
     }
 
+    @Override
     public List<Map<String, Object>> tableColumns(List<Map<String, Object>> schemaColumns, String tableName) {
-        List<Map<String, Object>> nl = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> nl = new ArrayList<>();
         for (Map<String, Object> t : schemaColumns) {
             if (t.get(Table.TABLE_NAME).equals(tableName)) {
                 nl.add(t);
@@ -227,14 +245,16 @@ public class EntityServices implements IEntityServices {
         return nl;
     }
 
+    @Override
     public List<Map<String, Object>> schemaColumns(String schema) {
         String SQL = StatementUtil.getInfSchemaColumns(schema);
         return dao.selectSQLMapResult(SQL);
     }
 
+    @Override
     public Map<String, String> tableColumnsMap(String schema, String tableName) {
         List<Map<String, Object>> columns = this.tableColumns(schema, tableName);
-        Map<String, String> mapcolumns = new HashMap<String, String>();
+        Map<String, String> mapcolumns = new HashMap<>();
         for (Map<String, Object> c : columns) {
             if (c.get("data_type").equals("USER-DEFINED")) {
                 mapcolumns.put(c.get("column_name").toString(), c.get("udt_name").toString());
@@ -275,6 +295,7 @@ public class EntityServices implements IEntityServices {
         return mapcolumns;
     }
 
+    @Override
     public Map<String, String> tableColumnsMap(List<Map<String, Object>> columns) {
         Map<String, String> mapcolumns = new HashMap<String, String>();
         for (Map<String, Object> c : columns) {
@@ -283,6 +304,7 @@ public class EntityServices implements IEntityServices {
         return mapcolumns;
     }
 
+    @Override
     public void destroyEntity(Entidad entidad) {
         if (entidad.isData()) {
             Entidad en = dao.get(Entidad.class, entidad.getId());
@@ -296,6 +318,7 @@ public class EntityServices implements IEntityServices {
         }
     }
 
+    @Override
     public List<Map<String, Object>> noEntityDataBase() {
         List<Entidad> entities = dao.find("from Entidad order by label");
         List<Map<String, Object>> stables = schemaTables("public");
@@ -318,10 +341,12 @@ public class EntityServices implements IEntityServices {
         return this.get("public", entity, id);
     }
 
+    @Override
     public EntityResult get(String entity, Object id, String[] fields) {
         return this.get("public", entity, id, fields);
     }
 
+    @Override
     public EntityResult get(String schema, String entity, Object id) {
         EntityResult result = new EntityResult();
         Map<String, String> tableMap = this.tableColumnsMap(schema, entity);
@@ -334,6 +359,7 @@ public class EntityServices implements IEntityServices {
         return result;
     }
 
+    @Override
     public EntityResult get(String schema, String entity, Object id, String[] fields) {
         EntityResult result = new EntityResult();
         String SQL = StatementUtil.simpleSelectObject(fields, schema, entity);
@@ -342,14 +368,17 @@ public class EntityServices implements IEntityServices {
         return result;
     }
 
+    @Override
     public EntityResult find(String entity) {
         return this.find("public", entity, new String[0]);
     }
 
+    @Override
     public EntityResult find(String schema, String entity) {
         return this.find(schema, entity, new String[0]);
     }
 
+    @Override
     public EntityResult find(String schema, String entity, String field) {
         return this.find(schema, entity, new String[0], field);
     }
@@ -365,6 +394,7 @@ public class EntityServices implements IEntityServices {
         return result;
     }
 
+    @Override
     public EntityResult find(String schema, String entity, String[] orderFields) {
         EntityResult result = new EntityResult();
         String[] nofields = {"the_geom"};
@@ -376,10 +406,12 @@ public class EntityServices implements IEntityServices {
         return result;
     }
 
+    @Override
     public EntityResult find(String entity, SimpleFilter filter) throws ParseException {
         return this.find("public", entity, filter);
     }
 
+    @Override
     public EntityResult find(String schema, String entity, SimpleFilter filter) throws ParseException {
         EntityResult result = new EntityResult();
         Map<String, String> tableMap = this.tableColumnsMap(schema, entity);
@@ -391,10 +423,12 @@ public class EntityServices implements IEntityServices {
         return result;
     }
 
+    @Override
     public EntityResult find(String entity, SimpleFilter filter, String[] fields) {
         return this.find("public", entity, filter, fields);
     }
 
+    @Override
     public EntityResult find(String schema, String entity, SimpleFilter filter, String[] fields) {
         EntityResult result = new EntityResult();
         String SQL = StatementUtil.simpleSelectTable(fields, schema, entity, filter);
@@ -404,14 +438,17 @@ public class EntityServices implements IEntityServices {
         return result;
     }
 
+    @Override
     public EntityResult persist(Map<String, Object> insertable, String entity) {
         return this.persist(insertable, "public", entity);
     }
 
+    @Override
     public EntityResult persist(Map<String, Object> insertable, String schema, String entity) {
         return this.persist(insertable, schema, entity, System.nanoTime());
     }
 
+    @Override
     public EntityResult persist(Map<String, Object> insertable, String schema, String entity, Object id) {
 
         Map<String, Object> Transactional = new HashMap<>();
@@ -467,14 +504,17 @@ public class EntityServices implements IEntityServices {
         return result;
     }
 
+    @Override
     public List<Map<String, Object>> getAddOnEntitiess() {
         return dao.selectSQLMapResult("select id, label, name from logic.entidad where visible is not null");
     }
 
+    @Override
     public boolean existObject(String schema, String entity, String field, Object value) {
         return dao.existObject(schema, entity, field, value);
     }
 
+    @Override
     public Map<String, Object> getExistObject(String schema, String entity, String field, Object value) throws ParseException {
         SimpleFilter sf = new SimpleFilter();
         sf.addANDRestriction(new Restriction(field, Restriction.EQUALS));
@@ -482,6 +522,7 @@ public class EntityServices implements IEntityServices {
         return this.find(schema, entity, sf).getObjectData();
     }
 
+    @Override
     public Map<String, Object> getExistObject(String schema, String entity, String field, Object value, String[] fields) {
         SimpleFilter sf = new SimpleFilter();
         sf.addANDRestriction(new Restriction(field, Restriction.EQUALS));
@@ -489,6 +530,7 @@ public class EntityServices implements IEntityServices {
         return this.find(schema, entity, sf, fields).getObjectData();
     }
 
+    @Override
     public Map<String, Object> buildPersistenObjectFromRequest(String schema, String entity, HttpServletRequest request) throws ParseException {
         Map<String, Object> input = DynamicEntityMap.requestMapToEntityMap(request.getParameterMap());
         Map<String, String> tableMap = tableColumnsMap(schema, entity);
@@ -496,12 +538,14 @@ public class EntityServices implements IEntityServices {
         return insertable;
     }
 
+    @Override
     public Map<String, Object> buildPersistenObjectFromRequest(String schema, String entity, Map<String, Object> input) throws ParseException {
         Map<String, String> tableMap = tableColumnsMap(schema, entity);
         Map<String, Object> insertable = DynamicEntityMap.parseInputMap(input, tableMap);
         return insertable;
     }
 
+    @Override
     public Map<String, Object> getInsertableFields(String schema, String entity, Map<String, Object> input) {
         Map<String, String> tableMap = tableColumnsMap(schema, entity);
         Map<String, Object> insertable = new HashMap<>(); //DynamicEntityMap.parseInputMap(input, tableMap);
@@ -513,6 +557,7 @@ public class EntityServices implements IEntityServices {
         return insertable;
     }
 
+    @Override
     public Map<String, Object> convertBeanMapToMap(BeanMap bm) {
         Map<String, Object> hm = new HashMap<>();
         Iterator<String> it = bm.keyIterator();
@@ -525,6 +570,7 @@ public class EntityServices implements IEntityServices {
         return hm;
     }
 
+    @Override
     public Map<String, Object> ignoreNullValues(Map<String, Object> input) {
         Map<String, Object> output = new HashMap<>();
         for (Entry<String, Object> e : input.entrySet()) {
@@ -535,6 +581,7 @@ public class EntityServices implements IEntityServices {
         return output;
     }
 
+    @Override
     public Set<String> tableMapToPostgisColumns(Set<Entry<String, String>> entries) {
         Set<String> cols = new HashSet<>();
         for (Entry e : entries) {
@@ -593,14 +640,17 @@ public class EntityServices implements IEntityServices {
         return er;
     }
 
+    @Override
     public EntityResult contains(String entity, String geomText) {
         return this.contains("public", entity, geomText);
     }
 
+    @Override
     public EntityResult contains(String schema, String entity, String geomText) {
         return this.contains(schema, entity, geomText, new String[0]);
     }
 
+    @Override
     public EntityResult contains(String schema, String entity, String geomText, String[] orderFields) {
         EntityResult result = new EntityResult();
         Map<String, String> tableMap = this.tableColumnsMap(schema, entity);
@@ -706,6 +756,7 @@ public class EntityServices implements IEntityServices {
         }
     }
 
+    @Override
     public HashMap<String, Object> getJsonMap(String jsondata) throws IOException {
         return new ObjectMapper().readValue(jsondata, HashMap.class);
     }
@@ -790,7 +841,7 @@ public class EntityServices implements IEntityServices {
         result.setSuccess(Boolean.TRUE);
         return result;
     }
-    
+
     @Override
     public EntityResult nativeQueryFind(String sql) {
         EntityResult result = new EntityResult();
