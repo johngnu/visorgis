@@ -67,20 +67,18 @@
         <!--<button href="#" class="btn btn-primary topbutton" data-toggle="modal" data-target="#moreinfo">MÁS INFORMACIÓN</button>-->
         <div class="bcontainer">
             <div class="btn-group">                
-                <div class="btn-group">
-                    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
-                        Opciones <span class="caret"></span></button>
-                    <ul class="dropdown-menu" role="menu">
-                        <li><a href="#" id="_draw_select">Seleccionar</a></li>
-                        <!--<li role="separator" class="divider"></li>
-                        <li><a href="#" id="_draw_polygon">Polígono</a></li>
-                        <li><a href="#" id="_draw_point">Punto</a></li>
-                        <li><a href="#" id="_draw_line">Línea</a></li>-->
-                        <li role="separator" class="divider"></li>
-                        <li><a href="#" id="_clear_all">Limpiar todo</a></li>
-                    </ul>
-                </div>
-                <!--<button type="button" class="btn btn-danger" id="_clear_all">Borrar</button>-->
+                <button type="button" class="btn btn-default" data-toggle="modal" data-target="#moreinfo">Detalles</button>
+                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+                    Opciones <span class="caret"></span></button>
+                <ul class="dropdown-menu" role="menu">
+                    <li><a href="#" id="_draw_select">Seleccionar</a></li>
+                    <!--<li role="separator" class="divider"></li>
+                    <li><a href="#" id="_draw_polygon">Polígono</a></li>
+                    <li><a href="#" id="_draw_point">Punto</a></li>
+                    <li><a href="#" id="_draw_line">Línea</a></li>-->
+                    <li role="separator" class="divider"></li>
+                    <li><a href="#" id="_clear_all">Limpiar todo</a></li>
+                </ul>                                
                 <button type="button" class="btn btn-primary" id="_unselect">Limpiar</button>
             </div> 
         </div>    
@@ -115,7 +113,7 @@
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title" id="myModalLabel">Más información</h4>
+                        <h4 class="modal-title" id="myModalLabel">Detalles</h4>
                     </div>
                     <div class="modal-body">                    
                         <div id="docContent"></div>
@@ -127,7 +125,7 @@
                         </figure>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" data-dismiss="modal">Ver mapa</button>                        
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>                        
                     </div>
                 </div>
             </div>
@@ -167,133 +165,8 @@
     <script src="https://code.highcharts.com/modules/export-data.js"></script>
     <script src="https://code.highcharts.com/modules/accessibility.js"></script>
 
-    <script type="text/javascript">
-        /**
-         * Principal GIS Server params config
-         * Author: John Castillo Valencia @johngnu
-         * Bolivia, 2020
-         */
-        Ext = new Object();
-        Ext.geoProjection = "EPSG:4326";
-        Ext.geoBounds = new OpenLayers.Bounds(
-                -8128496.9907945, -2675785.1418022,
-                -5675174.1312949, -1208194.1989312
-                );
-        Ext.geoOptions = {
-            maxExtent: Ext.geoBounds,
-            maxResolution: 4.777314267158508,
-            displayProjection: new OpenLayers.Projection("EPSG:4326"),
-            units: 'm'
-        };
-        // web proxy for GetFeatureInfo
-        Ext.localProxy = '/http_proxy/proxy?url=';
-        var domain = new Object();
-        domain.objects = {
-            proxy: Ext.localProxy,
-            geoserverUrl: Ext.geoserverUrl,
-            options: Ext.geoOptions,
-            projection: Ext.geoProjection,
-            featureFromText: function (the_geom, attrs) {
-                var feature = new OpenLayers.Feature.Vector(OpenLayers.Geometry.fromWKT(the_geom));
-                return feature;
-            },
-            selectFeature: function (map, feature, zoomto) {
-                var geographic = new OpenLayers.Projection("EPSG:4326");
-                var mercator = new OpenLayers.Projection("EPSG:900913");
-                feature.geometry.transform(geographic, mercator);
-                // this.objectselected.removeAllFeatures();
-                this.objectselected.addFeatures([feature]);
-                if (zoomto) {
-                    map.zoomToExtent(feature.geometry.getBounds());
-                }
-            },
-            styles: new OpenLayers.StyleMap({
-                "default": new OpenLayers.Style(null, {
-                    rules: [
-                        new OpenLayers.Rule({
-                            symbolizer: {
-                                "Point": {
-                                    pointRadius: 7,
-                                    fillColor: "#ffffff",
-                                    fillOpacity: 0.25,
-                                    strokeWidth: 2,
-                                    strokeOpacity: 1,
-                                    strokeColor: "#ababab"
-                                },
-                                "Line": {
-                                    strokeWidth: 3,
-                                    strokeOpacity: 0.7,
-                                    strokeColor: "#ababab"
-                                },
-                                "Polygon": {
-                                    strokeWidth: 2,
-                                    strokeOpacity: 1,
-                                    fillOpacity: 0.25,
-                                    fillColor: "#ffffff",
-                                    strokeColor: "#ababab"
-                                }
-                            }
-                        })
-                    ]
-                }),
-                "select": new OpenLayers.Style(null, {
-                    rules: [
-                        new OpenLayers.Rule({
-                            symbolizer: {
-                                "Point": {
-                                    pointRadius: 5,
-                                    graphicName: "square",
-                                    fillColor: "red",
-                                    fillOpacity: 0.25,
-                                    strokeWidth: 2,
-                                    strokeOpacity: 1,
-                                    strokeColor: "#0000ff"
-                                },
-                                "Line": {
-                                    strokeWidth: 3,
-                                    strokeOpacity: 1,
-                                    strokeColor: "#0000ff"
-                                },
-                                "Polygon": {
-                                    strokeWidth: 2,
-                                    strokeOpacity: 1,
-                                    fillColor: "#0000ff",
-                                    strokeColor: "#0000ff"
-                                }
-                            }
-                        })
-                    ]
-                }),
-                "temporary": new OpenLayers.Style(null, {
-                    rules: [
-                        new OpenLayers.Rule({
-                            symbolizer: {
-                                "Point": {
-                                    //graphicName: "square",
-                                    pointRadius: 5,
-                                    fillColor: "#ff0000",
-                                    fillOpacity: 0.25,
-                                    strokeWidth: 2,
-                                    strokeColor: "#ff0000"
-                                },
-                                "Line": {
-                                    strokeWidth: 3,
-                                    strokeOpacity: 1,
-                                    strokeColor: "#ff0000"
-                                },
-                                "Polygon": {
-                                    strokeWidth: 2,
-                                    strokeOpacity: 1,
-                                    strokeColor: "#ff0000",
-                                    fillColor: "#ff0000"
-                                }
-                            }
-                        })
-                    ]
-                })
-            })
-        };
-    </script> 
+    <!-- Custom page scrip -->
+    <script src="js/setup.js"></script>
 
     <script type="text/javascript">
         // Glove Info
@@ -467,7 +340,7 @@
                                         ];
 
                                         var time = new Date().getTime();
-                                        $("#docContent").html('<embed src="<c:url value="/visor/ficha/pdf?time="/>' + time + '" width="100%" height="200">')
+                                        $("#docContent").html('<embed src="<c:url value="/visor/ficha/pdf?time="/>' + time + '" width="100%" height="200"><br/><a class="btn btn-primary btn-sm" href="<c:url value="/visor/ficha/pdf?download=true"/>">Descargar</a>')
                                         Highcharts.chart('container', {
                                             chart: {
                                                 type: 'column',
@@ -549,10 +422,6 @@
             map.zoomToExtent(Ext.geoBounds);
             return map;
         };
-
-        var mainDetails = function () {
-            $('#moreinfo').modal('toggle');
-        }
 
         $(document).ready(function () {
             // N-Layers Array
@@ -671,17 +540,16 @@
             });
             $('#_unselect').on('click', function () {
                 domain.objects.objectselected.removeAllFeatures();
+                //
+                domain.objects.canvas.removeAllFeatures();
+                domain.objects.switchControl('clear');
+                domain.objects.dynamicMeasure.emptyKeeped();
             });
             $('#_draw_select').click(function () {
                 domain.objects.switchControl('select');
             });
 
-
-
-
-
         });
-
     </script>
 </html>
 
