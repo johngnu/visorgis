@@ -38,36 +38,31 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
- * VisorController
+ * DispersoController
  *
  * @since 30-01-2018
  * @author Johns Castillo Valencia email: john.gnu@gmail.com
  */
 @Controller
 @Scope("session")
-@RequestMapping(value = "/visor")
-public class VisorController implements Serializable {
+@RequestMapping(value = "/disperso")
+public class DispersoController implements Serializable {
 
-    private static final Logger logger = LoggerFactory.getLogger(VisorController.class);
+    private static final Logger logger = LoggerFactory.getLogger(DispersoController.class);
     @Autowired
     private IEntityServices service;
     @Autowired
     ServletContext servletContext;
     private OutputStream os;
 
-    @RequestMapping
-    public String index(Model model) {
-        return "iweb/index";
-    }
-
     @RequestMapping(value = "/ficha", method = RequestMethod.GET)
     @ResponseBody
     public Map<String, Object> ficha(@RequestParam String id) {
-        logger.info("GET ficha data by ID");
+        logger.info("GET disperso data by ID");
         Map<String, Object> data = new HashMap<>();
         try {
-            String sql = "select * from amanzanado.t_fichacensocnpv \n"
-                    + "where idmanzana = :id";
+            String sql = "select * from disperso.t_fichacensocnpv \n"
+                    + "where idcomunidad = :id";
             EntityResult er = service.nativeQueryFind(sql, id);
 
             data.put("data", er.getObjectData());
@@ -149,8 +144,8 @@ public class VisorController implements Serializable {
         try {
             Gson g = new Gson();
             String[] aids = g.fromJson(ids, String[].class);
-            String sql = "select * from amanzanado.t_fichacensocnpv \n"
-                    + "where idmanzana in " + paramsToIn(aids);
+            String sql = "select * from disperso.t_fichacensocnpv \n"
+                    + "where idcomunidad in " + paramsToIn(aids);
             EntityResult er = service.nativeQueryFind(sql);
             Map<String, Object> res = sumData(er);
             res.put("num_manzano", aids.length);
@@ -569,9 +564,9 @@ public class VisorController implements Serializable {
         logger.info("GET selected data by geom");
         Map<String, Object> data = new HashMap<>();
         try {
-            String sql = "select data.idmanzana, st_astext(data.geom) as geom from \n"
+            String sql = "select data.idcomunidad, st_astext(data.geom) as geom from \n"
                     + "(select *, st_contains(st_geomfromtext(:geom, 4326),geom) \n"
-                    + "from amanzanado.t_manzanas_view) as data \n"
+                    + "from disperso.v_fichadisperso) as data \n"
                     + "where st_contains = true";
 
             EntityResult er = service.nativeQueryFind(sql, geom);

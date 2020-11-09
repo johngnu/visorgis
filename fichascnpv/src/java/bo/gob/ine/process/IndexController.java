@@ -31,6 +31,32 @@ public class IndexController {
         return "errorPage";
     }
 
+    @RequestMapping(value = "/amanzanado", method = RequestMethod.GET)
+    public String amanzanado(Model model, HttpServletRequest request) {
+        try {
+            String url = request.getRequestURL().toString();
+            model.addAttribute("url", url);
+            return "amanzanado";
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("errorMessage", e.getMessage());
+        }
+        return "errorPage";
+    }
+
+    @RequestMapping(value = "/disperso", method = RequestMethod.GET)
+    public String disperso(Model model, HttpServletRequest request) {
+        try {
+            String url = request.getRequestURL().toString();
+            model.addAttribute("url", url);
+            return "disperso";
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("errorMessage", e.getMessage());
+        }
+        return "errorPage";
+    }
+
     @RequestMapping(value = "/error", method = RequestMethod.GET)
     public String error(Model model) {
         try {
