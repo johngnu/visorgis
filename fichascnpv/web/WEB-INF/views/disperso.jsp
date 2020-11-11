@@ -434,7 +434,7 @@
         $(document).ready(function () {
             // N-Layers Array
             var layers = new Array();
-            layers.push({label: 'Manzanas', url: 'http://localhost:8084/geoserver/censo/', layer: 'censo:v_fichadisperso', searchField: 'idcomunidad'});
+            layers.push({label: 'Disperso', url: 'http://localhost:8084/geoserver/censo/', layer: 'censo:v_fichadisperso', searchField: 'idcomunidad'});
             //layers.push({label: 'Municipios', url: 'http://apps.icg.com.bo:8090/geoserver/elec/', layer: 'elec:municipio', searchField: 'municipio_'});
             /*layers.push({label: 'A', url: 'http://apps.icg.com.bo:8090/geoserver/elec/', layer: 'elec:municipio', searchField: 'municipio_'});
              layers.push({label: 'B', url: 'http://apps.icg.com.bo:8090/geoserver/elec/', layer: 'elec:municipio', searchField: 'municipio_'});
