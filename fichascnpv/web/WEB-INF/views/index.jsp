@@ -172,16 +172,13 @@
         // Glove Info
         domain.objects.popup = function (feature, map) {
             var predioDetails = '<div class="card-content">';
-            /*for (var key in feature.data) {
-                predioDetails += '<strong>' + key + ': ' + feature.data[key] + '</strong><br>';
-            }*/
             predioDetails += '<strong>depto_estadistico: ' + feature.data.departamento + '</strong><br>';
             predioDetails += '<strong>prov_estadistico: ' + feature.data.provincia + '</strong><br>';
             predioDetails += '<strong>mun_estadistico: ' + feature.data.municipio + '</strong><br>';
             predioDetails += '<strong>nombreciudad: ' + feature.data.nombreciudad + '</strong><br>';
-            predioDetails += '<strong>pob_empadronada: ' + feature.data.pob_empadronada + '</strong><br>';
-            predioDetails += '<strong>viviendas: ' + feature.data.viviendas + '</strong><br>';
-            predioDetails += '<strong>pob_60años_mas: ' + feature.data.pob_60años_mas + '</strong><br>';
+            predioDetails += '<strong>pob_empadronada: ' + feature.data.pob_edad_tot + '</strong><br>';
+            predioDetails += '<strong>viviendas: ' + feature.data.viv_vivpart + '</strong><br>';
+            predioDetails += '<strong>pob_60años_mas: ' + feature.data.pob_edad_60mas + '</strong><br>';
             predioDetails += '<strong>cod_ine: ' + feature.data.idmanzana + '</strong><br>';
 
             predioDetails += '</div>';
