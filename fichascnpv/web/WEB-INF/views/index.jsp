@@ -146,6 +146,23 @@
                 </div>
             </div>
         </div> 
+        
+        <div class="modal fade" id="nFeaturesDialog" tabindex="-1" role="dialog" aria-labelledby="nFeaturesDialog" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="myModalLabel">Aviso</h4>
+                    </div>
+                    <div class="modal-body">                        
+                        <p class="text-muted">Más de un objeto encontrado.</p>   
+                        <div id="_nresults_"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Aceptar</button>                        
+                    </div>
+                </div>
+            </div>
+        </div> 
     </body>
 
     <!-- Core JS Files   -->
@@ -427,6 +444,11 @@
             map.zoomToExtent(Ext.geoBounds);
             return map;
         };
+        
+        domain.objects.focus = function (fid) {
+            var f = domain.objects.objectselected.getFeatureById(fid);
+            domain.objects.imap.zoomToExtent(f.geometry.getBounds());
+        };
 
         $(document).ready(function () {
             // N-Layers Array
@@ -487,38 +509,65 @@
 
                 $('#search-form').submit(function () {
                     var search = $(this).find('input[name="txtSearch"]').val();
-                    $.ajax({
-                        method: 'POST',
-                        url: Ext.localProxy + domain.objects.activeSLayer.url + 'wfs',
-                        data: {
-                            "service": "WFS",
-                            "request": "GetFeature",
-                            "typename": domain.objects.activeSLayer.layer,
-                            "outputFormat": "application/json",
-                            "srsname": "EPSG:4326",
-                            "maxFeatures": 50,
-                            "CQL_FILTER": domain.objects.activeSLayer.searchField + "='" + search + "'"
-                        },
-                        success: function (response, status, xhr) {
-                            if (xhr.getResponseHeader('Content-Type') === 'application/json') {
-                                var geojson_format = new OpenLayers.Format.GeoJSON();
-                                var features = geojson_format.read(response, "FeatureCollection");
-                                if (features.length > 0) {
-                                    var feature = features[0];
-                                    domain.objects.selectFeature(map, feature, true);
-                                    domain.objects.popup(feature, map);
+                    console.log(domain.objects.activeSLayer);
+                    if(domain.objects.activeSLayer.label === 'Manzanas') {
+                        $.ajax({
+                            method: 'POST',
+                            url: Ext.localProxy + 'http://sigedv2.ine.gob.bo:80/geoserver/siged/wfs',
+                            data: {
+                                "service": "WFS",
+                                "request": "GetFeature",
+                                "typename": 'siged:v_perimetros',
+                                "outputFormat": "application/json",
+                                "srsname": "EPSG:4326",
+                                "maxFeatures": 50,
+                                "CQL_FILTER": "strToLowerCase(nombreciudad) like '%" + search.toLowerCase() + "%'"
+                            },
+                            success: function (response, status, xhr) {
+                                if (xhr.getResponseHeader('Content-Type') === 'application/json') {
+                                    var geojson_format = new OpenLayers.Format.GeoJSON();
+                                    var features = geojson_format.read(response, "FeatureCollection");
+                                    if (features.length > 0) {
+                                        //var feature = features[0];
+                                        //domain.objects.selectFeature(map, feature, true);
+                                        //domain.objects.popup(feature, map);
+                                        domain.objects.objectselected.removeAllFeatures();
+                                        features.forEach(function (feature, index) {
+                                            domain.objects.selectFeature(map, feature, false);                                       
+                                        });
+                                        map.zoomToExtent(domain.objects.objectselected.getDataExtent());
+                                        if(features.length > 1) {
+                                            $('#nFeaturesDialog').modal('toggle');
+                                            var html = '<table class="table table-bordered"><thead><tr><th>Cod. Municipio</th><th>Nombre ciudad</th><th>Opción</th></tr></thead><tbody>';
+                                            domain.objects.objectselected.features.forEach(function (feature, index) {
+                                                // console.log(feature);
+                                                html = html + '<tr><td>' + feature.data.codigomunicipio + '</td>';
+                                                html = html + '<td>' + feature.data.nombreciudad + '</td>';
+                                                html = html + '<td><button class="btn focusf" value="'+feature.id+'">ver</button></td></tr>';
+                                            });    
+                                            html = html + '</tbody></table>';
+                                            $('#_nresults_').html(html);
+                                            $('.focusf').on('click', function () {                                            
+                                                domain.objects.focus($(this).val());
+                                                $('#nFeaturesDialog').modal('toggle');
+                                            });
+                                        }
+                                    } else {
+                                        $('#notFoundDialog').modal('toggle');                                    
+                                    }
                                 } else {
                                     $('#notFoundDialog').modal('toggle');
                                 }
-                            } else {
-                                $('#notFoundDialog').modal('toggle');
+                            },
+                            fail: function (jqXHR, textStatus) {
+                                console.log("Request failed: " + textStatus);
                             }
-                        },
-                        fail: function (jqXHR, textStatus) {
-                            console.log("Request failed: " + textStatus);
-                        }
-                    });
-
+                        });
+                    }
+                    if(domain.objects.activeSLayer.label === 'Disperso') {
+                        $('#notFoundDialog').modal('toggle');
+                        // pendiente ...
+                    }    
                     return false;
                 });
             }
@@ -550,7 +599,7 @@
             $('#_draw_select').click(function () {
                 domain.objects.switchControl('select');
             });
-
+            
         });
     </script>
 </html>
