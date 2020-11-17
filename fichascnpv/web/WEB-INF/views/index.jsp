@@ -453,8 +453,8 @@
         $(document).ready(function () {
             // N-Layers Array
             var layers = new Array();
-            layers.push({label: 'Manzanas', url: 'http://localhost:8084/geoserver/censo/', layer: 'censo:v_fichamanzana', searchField: 'idmanzana', endPoint: '<c:url value="/amanzanado"/>'});
-            layers.push({label: 'Disperso', url: 'http://localhost:8084/geoserver/censo/', layer: 'censo:v_fichadisperso', searchField: 'idcomunidad', endPoint: '<c:url value="/disperso"/>'});
+            layers.push({label: 'Manzanas', url: 'http://sigedv2.ine.gob.bo/geoserver/siged/', layer: 'siged:v_fichamanzana', searchField: 'idmanzana', endPoint: '<c:url value="/amanzanado"/>'});
+            layers.push({label: 'Disperso', url: 'http://sigedv2.ine.gob.bo/geoserver/siged/', layer: 'siged:v_fichadisperso', searchField: 'idcomunidad', endPoint: '<c:url value="/disperso"/>'});
 
             // Create Map
             var map = domain.objects.mapa({layers: layers});
@@ -509,7 +509,7 @@
 
                 $('#search-form').submit(function () {
                     var search = $(this).find('input[name="txtSearch"]').val();
-                    console.log(domain.objects.activeSLayer);
+                    //console.log(domain.objects.activeSLayer);
                     if(domain.objects.activeSLayer.label === 'Manzanas') {
                         $.ajax({
                             method: 'POST',
@@ -565,8 +565,58 @@
                         });
                     }
                     if(domain.objects.activeSLayer.label === 'Disperso') {
-                        $('#notFoundDialog').modal('toggle');
-                        // pendiente ...
+                        $.ajax({
+                            method: 'POST',
+                            url: Ext.localProxy + 'http://sigedv2.ine.gob.bo:80/geoserver/siged/wfs',
+                            data: {
+                                "service": "WFS",
+                                "request": "GetFeature",
+                                "typename": 'siged:v_fichadisperso',
+                                "outputFormat": "application/json",
+                                "srsname": "EPSG:4326",
+                                "maxFeatures": 50,
+                                "CQL_FILTER": "strToLowerCase(nombreciudad) like '%" + search.toLowerCase() + "%'"
+                            },
+                            success: function (response, status, xhr) {
+                                if (xhr.getResponseHeader('Content-Type') === 'application/json') {
+                                    var geojson_format = new OpenLayers.Format.GeoJSON();
+                                    var features = geojson_format.read(response, "FeatureCollection");
+                                    if (features.length > 0) {
+                                        //var feature = features[0];
+                                        //domain.objects.selectFeature(map, feature, true);
+                                        //domain.objects.popup(feature, map);
+                                        domain.objects.objectselected.removeAllFeatures();
+                                        features.forEach(function (feature, index) {
+                                            domain.objects.selectFeature(map, feature, false);                                       
+                                        });
+                                        map.zoomToExtent(domain.objects.objectselected.getDataExtent());
+                                        if(features.length > 1) {
+                                            $('#nFeaturesDialog').modal('toggle');
+                                            var html = '<table class="table table-bordered"><thead><tr><th>Municipio</th><th>Nombre ciudad</th><th>Opción</th></tr></thead><tbody>';
+                                            domain.objects.objectselected.features.forEach(function (feature, index) {
+                                                // console.log(feature);
+                                                html = html + '<tr><td>' + feature.data.municipio + '</td>';
+                                                html = html + '<td>' + feature.data.nombreciudad + '</td>';
+                                                html = html + '<td><button class="btn focusf" value="'+feature.id+'">ver</button></td></tr>';
+                                            });    
+                                            html = html + '</tbody></table>';
+                                            $('#_nresults_').html(html);
+                                            $('.focusf').on('click', function () {                                            
+                                                //domain.objects.focus($(this).val());
+                                                $('#nFeaturesDialog').modal('toggle');
+                                            });
+                                        }
+                                    } else {
+                                        $('#notFoundDialog').modal('toggle');                                    
+                                    }
+                                } else {
+                                    $('#notFoundDialog').modal('toggle');
+                                }
+                            },
+                            fail: function (jqXHR, textStatus) {
+                                console.log("Request failed: " + textStatus);
+                            }
+                        });
                     }    
                     return false;
                 });
