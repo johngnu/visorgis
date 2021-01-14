@@ -369,7 +369,7 @@ public class Ficha {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws Exception {
-        String inputFilePath = "C:/opt/Ficha_INE_CNPV.pdf"; // Existing file
+        String inputFilePath = "C:/opt/Ficha_INE_CNA.pdf"; // Existing file
         String outputFilePath = "C:/opt/output.pdf"; // New file
 
         Map<String, String> data = Ficha.data();

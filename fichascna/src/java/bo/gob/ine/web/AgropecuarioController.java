@@ -16,6 +16,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -37,31 +38,31 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
- * AmanzanadoController
+ * AgropecuarioController
  *
  * @since 30-01-2018
  * @author Johns Castillo Valencia email: john.gnu@gmail.com
  */
 @Controller
 @Scope("session")
-@RequestMapping(value = "/amanzanado")
-public class AmanzanadoController implements Serializable {
+@RequestMapping(value = "/agropecuario")
+public class AgropecuarioController implements Serializable {
 
-    private static final Logger logger = LoggerFactory.getLogger(AmanzanadoController.class);
+    private static final Logger logger = LoggerFactory.getLogger(AgropecuarioController.class);
     @Autowired
     private IEntityServices service;
     @Autowired
     ServletContext servletContext;
     private OutputStream os;
-    
+
     @RequestMapping(value = "/ficha", method = RequestMethod.GET)
     @ResponseBody
     public Map<String, Object> ficha(@RequestParam String id) {
         logger.info("GET ficha data by ID");
         Map<String, Object> data = new HashMap<>();
         try {
-            String sql = "select * from amanzanado.t_fichacensocnpv \n"
-                    + "where idmanzana = :id";
+            String sql = "select * from disperso.t_fichacensocnaproductor \n"
+                    + "where idcomunidad = :id";
             EntityResult er = service.nativeQueryFind(sql, id);
 
             data.put("data", er.getObjectData());
@@ -77,8 +78,26 @@ public class AmanzanadoController implements Serializable {
     private Map<String, Object> sumData(EntityResult er) {
         Map<String, Object> res = new HashMap<>();
         if (er.getSize() > 0) {
-            Map<String, Object> keys = er.getListData().get(0);
-            for (Entry<String, Object> en : keys.entrySet()) {
+            Set<String> keys = er.getListData().get(0).keySet();
+            for (String key : keys) {
+                Set<String> strVal = new HashSet<>();
+                Double dVal = 0d;
+                for (Map<String, Object> m : er.getListData()) {
+                    if (m.get(key) != null) {
+                        if (m.get(key) instanceof String) {
+                            strVal.add(m.get(key).toString());
+                        } else if (m.get(key) instanceof Integer || m.get(key) instanceof BigDecimal) {
+                            dVal += new Double(m.get(key).toString());
+                        }
+                    }
+                }
+                if (strVal.isEmpty()) {
+                    res.put(key, dVal);
+                } else {
+                    res.put(key, strVal.toString().replaceAll("\\[|\\]", ""));
+                }
+            }
+            /*Map<String, Object> keys = er.getListData().get(0);
                 if (en.getValue() instanceof Integer) {
                     Integer x = 0;
                     for (Map<String, Object> m : er.getListData()) {
@@ -91,8 +110,8 @@ public class AmanzanadoController implements Serializable {
                         vs.add(m.get(en.getKey()).toString());
                     }
                     res.put(en.getKey(), vs.toString().replaceAll("\\[|\\]", ""));
-                }
-            }
+                }*/
+
         }
         return res;
     }
@@ -142,52 +161,53 @@ public class AmanzanadoController implements Serializable {
         Map<String, Object> data = new HashMap<>();
         try {
             Gson g = new Gson();
-            String[] aids = g.fromJson(ids, String[].class);
-            String sql = "select * from amanzanado.t_fichacensocnpv \n"
-                    + "where idmanzana in " + paramsToIn(aids);
+            String[] aids = g.fromJson(ids, String[].class
+            );
+            String sql = "select * from disperso.t_fichacensocnaproductor \n"
+                    + "where idcomunidad in " + paramsToIn(aids);
             EntityResult er = service.nativeQueryFind(sql);
             Map<String, Object> res = sumData(er);
-            res.put("num_manzano", aids.length);
+            res.put("num_puntos", aids.length);
             // vivienda
-            Integer sv = (Integer) res.get("viv_vivpart") + 
-                    (Integer) res.get("viv_vivcolec");
-            res.put("total_viv", sv);
+            /*Integer sv = (Integer) res.get("viv_vivpart")
+                    + (Integer) res.get("viv_vivcolec");
+            res.put("total_viv", sv);*/
             // disp. energ. elec.
-            Integer eel = (Integer) res.get("viv_sb_enrg_red") + 
-                    (Integer) res.get("viv_sb_enrg_otrfuente") + 
-                    (Integer) res.get("viv_sb_enrg_notiene");
-            res.put("total_energia", eel);
+            /*Integer eel = (Integer) res.get("viv_sb_enrg_red")
+                    + (Integer) res.get("viv_sb_enrg_otrfuente")
+                    + (Integer) res.get("viv_sb_enrg_notiene");
+            res.put("total_energia", eel);*/
             // combustible
-            Integer com = (Integer) res.get("viv_sb_comb_gasgarraf") + 
-                    (Integer) res.get("viv_sb_comb_caneria") + 
-                    (Integer) res.get("viv_sb_comb_lenia") +
-                    (Integer) res.get("viv_sb_comb_otros");
-            res.put("total_combustible", com);
+            /*Integer com = (Integer) res.get("viv_sb_comb_gasgarraf")
+                    + (Integer) res.get("viv_sb_comb_caneria")
+                    + (Integer) res.get("viv_sb_comb_lenia")
+                    + (Integer) res.get("viv_sb_comb_otros");
+            res.put("total_combustible", com);*/
             // Procedencia del agua
-            Integer agu = (Integer) res.get("viv_sb_agua_red") + 
-                    (Integer) res.get("viv_sb_agua_ppublica") + 
-                    (Integer) res.get("viv_sb_agua_carro") +
-                    (Integer) res.get("viv_sb_agua_pozo") +
-                    (Integer) res.get("viv_sb_agua_lluvia") +
-                    (Integer) res.get("viv_sb_agua_otros");
-            res.put("total_sb_agua", agu);
+            /*Integer agu = (Integer) res.get("viv_sb_agua_red")
+                    + (Integer) res.get("viv_sb_agua_ppublica")
+                    + (Integer) res.get("viv_sb_agua_carro")
+                    + (Integer) res.get("viv_sb_agua_pozo")
+                    + (Integer) res.get("viv_sb_agua_lluvia")
+                    + (Integer) res.get("viv_sb_agua_otros");
+            res.put("total_sb_agua", agu);*/
             // Desague del servicio sanitario
-            Integer san = (Integer) res.get("viv_sb_desgu_alcant") + 
-                    (Integer) res.get("viv_sb_desgu_camsept") + 
-                    (Integer) res.get("viv_sb_desgu_pozociego") +
-                    (Integer) res.get("viv_sb_desgu_calle") +
-                    (Integer) res.get("viv_sb_desgu_quebrada") +
-                    (Integer) res.get("viv_sb_desgu_lago");
-            res.put("total_desague", san);
+            /*Integer san = (Integer) res.get("viv_sb_desgu_alcant")
+                    + (Integer) res.get("viv_sb_desgu_camsept")
+                    + (Integer) res.get("viv_sb_desgu_pozociego")
+                    + (Integer) res.get("viv_sb_desgu_calle")
+                    + (Integer) res.get("viv_sb_desgu_quebrada")
+                    + (Integer) res.get("viv_sb_desgu_lago");
+            res.put("total_desague", san);*/
             // Desague del servicio sanitario
-            Integer bas = (Integer) res.get("viv_basura_contened") + 
-                    (Integer) res.get("viv_basura_carro") + 
-                    (Integer) res.get("viv_basura_baldio") +
-                    (Integer) res.get("viv_basura_rio") +
-                    (Integer) res.get("viv_basura_queman") +
-                    (Integer) res.get("viv_basura_entierran") +
-                    (Integer) res.get("viv_basura_otros");
-            res.put("total_basura", bas);
+            /*Integer bas = (Integer) res.get("viv_basura_contened")
+                    + (Integer) res.get("viv_basura_carro")
+                    + (Integer) res.get("viv_basura_baldio")
+                    + (Integer) res.get("viv_basura_rio")
+                    + (Integer) res.get("viv_basura_queman")
+                    + (Integer) res.get("viv_basura_entierran")
+                    + (Integer) res.get("viv_basura_otros");
+            res.put("total_basura", bas);*/
             // fin sumas
             // System.out.println(res);
             os = fichaOutputStream(convertStringMap(res));
@@ -195,6 +215,7 @@ public class AmanzanadoController implements Serializable {
             data.put("data", res);
             data.put("success", Boolean.TRUE);
         } catch (Exception e) {
+            e.printStackTrace();
             logger.error("Error al obtener ejecutar SQL: " + e.getMessage());
             data.put("success", Boolean.FALSE);
             data.put("errorMessage", e.getMessage());
@@ -224,14 +245,15 @@ public class AmanzanadoController implements Serializable {
         //pdfPage.showText(text); // add the text
         //System.out.println("Text added in " + outputFilePath);        
         pdfPage.showTextAligned(aligment, text, x, y, 0);
-        
+
         pdfPage.endText();
     }
 
     private OutputStream fichaOutputStream(Map<String, String> data) {
         try {
-            String BLANK_FILE = servletContext.getRealPath("/input") + "/Ficha_INE_CNPV.pdf";
-
+            String BLANK_FILE = servletContext.getRealPath("/input") + "/Ficha_INE_CNA.pdf";
+            System.out.println(data);
+            
             OutputStream os = new ByteArrayOutputStream();
             PdfReader pdfReader = new PdfReader(BLANK_FILE);
             PdfStamper pdfStamper = new PdfStamper(pdfReader, os);
@@ -244,7 +266,7 @@ public class AmanzanadoController implements Serializable {
             setText(pdfPage1, 160, 738, data.get("provincia"), Element.ALIGN_LEFT);
             setText(pdfPage1, 160, 729, data.get("municipio"), Element.ALIGN_LEFT);
             setText(pdfPage1, 160, 720, data.get("municipio"), Element.ALIGN_LEFT);
-            setText(pdfPage1, 160, 712, data.get("num_manzano"), Element.ALIGN_LEFT);
+            setText(pdfPage1, 180, 720, data.get("num_manzano"), Element.ALIGN_LEFT);
 
             // POBLACION EMPADRONADA POR SEXO, SEGUN GRUPO DE EDAD
             setText(pdfPage1, 185, 652, data.get("pob_edad_tot"), Element.ALIGN_RIGHT);
@@ -563,9 +585,9 @@ public class AmanzanadoController implements Serializable {
         logger.info("GET selected data by geom");
         Map<String, Object> data = new HashMap<>();
         try {
-            String sql = "select data.idmanzana, st_astext(data.geom) as geom from \n"
+            String sql = "select data.cod_ine, st_astext(data.geom) as geom from \n"
                     + "(select *, st_contains(st_geomfromtext(:geom, 4326),geom) \n"
-                    + "from amanzanado.v_fichamanzana) as data \n"
+                    + "from disperso.t_comunidades_cna_publicacion) as data \n"
                     + "where st_contains = true";
 
             EntityResult er = service.nativeQueryFind(sql, geom);

@@ -13,7 +13,7 @@
         <link rel="icon" type="image/png" href="img/logo.png" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-        <title>Ficha CNPV</title>
+        <title>Ficha CNA</title>
 
         <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport" />
         <meta name="viewport" content="width=device-width" />
@@ -453,8 +453,7 @@
         $(document).ready(function () {
             // N-Layers Array
             var layers = new Array();
-            layers.push({label: 'Manzanas', url: 'http://sigedv2.ine.gob.bo/geoserver/siged/', layer: 'siged:v_fichamanzana', searchField: 'idmanzana', endPoint: '<c:url value="/amanzanado"/>'});
-            layers.push({label: 'Disperso', url: 'http://sigedv2.ine.gob.bo/geoserver/siged/', layer: 'siged:v_fichadisperso', searchField: 'idcomunidad', endPoint: '<c:url value="/disperso"/>'});
+            layers.push({label: 'Comunidades', url: 'http://sigedv2.ine.gob.bo/geoserver/siged/', layer: 'siged:t_comunidades_cna_publicacion', searchField: 'cod_ine', endPoint: '<c:url value="/agropecuario"/>'});
 
             // Create Map
             var map = domain.objects.mapa({layers: layers});
