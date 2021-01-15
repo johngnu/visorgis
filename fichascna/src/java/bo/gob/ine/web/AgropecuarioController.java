@@ -266,7 +266,7 @@ public class AgropecuarioController implements Serializable {
             setText(pdfPage1, 160, 738, data.get("provincia"), Element.ALIGN_LEFT);
             setText(pdfPage1, 160, 729, data.get("municipio"), Element.ALIGN_LEFT);
             setText(pdfPage1, 160, 720, data.get("municipio"), Element.ALIGN_LEFT);
-            setText(pdfPage1, 180, 720, data.get("num_manzano"), Element.ALIGN_LEFT);
+            setText(pdfPage1, 180, 720, data.get("num_puntos"), Element.ALIGN_LEFT);
 
             // POBLACION EMPADRONADA POR SEXO, SEGUN GRUPO DE EDAD
             setText(pdfPage1, 185, 652, data.get("pob_edad_tot"), Element.ALIGN_RIGHT);
