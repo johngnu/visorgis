@@ -97,20 +97,6 @@ public class AgropecuarioController implements Serializable {
                     res.put(key, strVal.toString().replaceAll("\\[|\\]", ""));
                 }
             }
-            /*Map<String, Object> keys = er.getListData().get(0);
-                if (en.getValue() instanceof Integer) {
-                    Integer x = 0;
-                    for (Map<String, Object> m : er.getListData()) {
-                        x += Integer.parseInt(m.get(en.getKey()).toString());
-                    }
-                    res.put(en.getKey(), x);
-                } else if (en.getValue() instanceof String) {
-                    Set<String> vs = new HashSet<>();
-                    for (Map<String, Object> m : er.getListData()) {
-                        vs.add(m.get(en.getKey()).toString());
-                    }
-                    res.put(en.getKey(), vs.toString().replaceAll("\\[|\\]", ""));
-                }*/
 
         }
         return res;
@@ -161,55 +147,36 @@ public class AgropecuarioController implements Serializable {
         Map<String, Object> data = new HashMap<>();
         try {
             Gson g = new Gson();
-            String[] aids = g.fromJson(ids, String[].class
-            );
+            String[] aids = g.fromJson(ids, String[].class);
+
             String sql = "select * from disperso.t_fichacensocnaproductor \n"
                     + "where idcomunidad in " + paramsToIn(aids);
             EntityResult er = service.nativeQueryFind(sql);
             Map<String, Object> res = sumData(er);
             res.put("num_puntos", aids.length);
             // vivienda
-            /*Integer sv = (Integer) res.get("viv_vivpart")
-                    + (Integer) res.get("viv_vivcolec");
-            res.put("total_viv", sv);*/
-            // disp. energ. elec.
-            /*Integer eel = (Integer) res.get("viv_sb_enrg_red")
-                    + (Integer) res.get("viv_sb_enrg_otrfuente")
-                    + (Integer) res.get("viv_sb_enrg_notiene");
-            res.put("total_energia", eel);*/
-            // combustible
-            /*Integer com = (Integer) res.get("viv_sb_comb_gasgarraf")
-                    + (Integer) res.get("viv_sb_comb_caneria")
-                    + (Integer) res.get("viv_sb_comb_lenia")
-                    + (Integer) res.get("viv_sb_comb_otros");
-            res.put("total_combustible", com);*/
-            // Procedencia del agua
-            /*Integer agu = (Integer) res.get("viv_sb_agua_red")
-                    + (Integer) res.get("viv_sb_agua_ppublica")
-                    + (Integer) res.get("viv_sb_agua_carro")
-                    + (Integer) res.get("viv_sb_agua_pozo")
-                    + (Integer) res.get("viv_sb_agua_lluvia")
-                    + (Integer) res.get("viv_sb_agua_otros");
-            res.put("total_sb_agua", agu);*/
-            // Desague del servicio sanitario
-            /*Integer san = (Integer) res.get("viv_sb_desgu_alcant")
-                    + (Integer) res.get("viv_sb_desgu_camsept")
-                    + (Integer) res.get("viv_sb_desgu_pozociego")
-                    + (Integer) res.get("viv_sb_desgu_calle")
-                    + (Integer) res.get("viv_sb_desgu_quebrada")
-                    + (Integer) res.get("viv_sb_desgu_lago");
-            res.put("total_desague", san);*/
-            // Desague del servicio sanitario
-            /*Integer bas = (Integer) res.get("viv_basura_contened")
-                    + (Integer) res.get("viv_basura_carro")
-                    + (Integer) res.get("viv_basura_baldio")
-                    + (Integer) res.get("viv_basura_rio")
-                    + (Integer) res.get("viv_basura_queman")
-                    + (Integer) res.get("viv_basura_entierran")
-                    + (Integer) res.get("viv_basura_otros");
-            res.put("total_basura", bas);*/
-            // fin sumas
-            // System.out.println(res);
+
+            os = fichaOutputStream(convertStringMap(res));
+
+            data.put("data", res);
+            data.put("success", Boolean.TRUE);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("Error al obtener ejecutar SQL: " + e.getMessage());
+            data.put("success", Boolean.FALSE);
+            data.put("errorMessage", e.getMessage());
+        }
+        return data;
+    }
+
+    @RequestMapping(value = "/ficha/unidata", method = RequestMethod.POST)
+    @ResponseBody
+    public Map<String, Object> iniData(@RequestParam String id, @RequestParam(required = false) Boolean download) {
+        Map<String, Object> data = new HashMap<>();
+        try {
+            // get data
+            Map<String, Object> res = service.getExistObject("public", "temporal", "cod_ine", id);
+            //             
             os = fichaOutputStream(convertStringMap(res));
 
             data.put("data", res);
@@ -226,7 +193,11 @@ public class AgropecuarioController implements Serializable {
     private Map<String, String> convertStringMap(Map<String, Object> map) {
         Map<String, String> result = new HashMap<>();
         for (Entry<String, Object> e : map.entrySet()) {
-            result.put(e.getKey(), String.valueOf(e.getValue()));
+            if (e.getValue() != null) {
+                result.put(e.getKey(), String.valueOf(e.getValue()));
+            } else {
+                result.put(e.getKey(), "");
+            }
         }
         return result;
     }
@@ -253,7 +224,7 @@ public class AgropecuarioController implements Serializable {
         try {
             String BLANK_FILE = servletContext.getRealPath("/input") + "/Ficha_INE_CNA.pdf";
             System.out.println(data);
-            
+
             OutputStream os = new ByteArrayOutputStream();
             PdfReader pdfReader = new PdfReader(BLANK_FILE);
             PdfStamper pdfStamper = new PdfStamper(pdfReader, os);
@@ -262,313 +233,186 @@ public class AgropecuarioController implements Serializable {
             PdfContentByte pdfPage1 = pdfStamper.getOverContent(1);
 
             // DATOS INICIALES
-            setText(pdfPage1, 160, 747, data.get("departamento"), Element.ALIGN_LEFT);
-            setText(pdfPage1, 160, 738, data.get("provincia"), Element.ALIGN_LEFT);
-            setText(pdfPage1, 160, 729, data.get("municipio"), Element.ALIGN_LEFT);
-            setText(pdfPage1, 160, 720, data.get("municipio"), Element.ALIGN_LEFT);
-            setText(pdfPage1, 180, 720, data.get("num_puntos"), Element.ALIGN_LEFT);
+            setText(pdfPage1, 160, 747, data.get("depto_estadistico"), Element.ALIGN_LEFT);
+            setText(pdfPage1, 160, 738, data.get("prov_estadistico"), Element.ALIGN_LEFT);
+            setText(pdfPage1, 160, 729, data.get("mun_estadistico"), Element.ALIGN_LEFT);
+            setText(pdfPage1, 160, 720, data.get("nom_comunidad"), Element.ALIGN_LEFT);  //LISTA DE COMUNIDADES
 
-            // POBLACION EMPADRONADA POR SEXO, SEGUN GRUPO DE EDAD
-            setText(pdfPage1, 185, 652, data.get("pob_edad_tot"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 233, 652, data.get("pob_edad_toth"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 281, 652, data.get("pob_edad_totm"), Element.ALIGN_RIGHT);
+            // DATOS GENERALES
+            setText(pdfPage1, 240, 665, data.get("zonaagro"), Element.ALIGN_CENTER);
+            setText(pdfPage1, 281, 652, data.get("nroupas"), Element.ALIGN_RIGHT);     // NUMERO DE COMUNIDADES
+            setText(pdfPage1, 281, 640, data.get("nroupas"), Element.ALIGN_RIGHT);
 
-            setText(pdfPage1, 185, 640, data.get("pob_edad_0003"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 233, 640, data.get("pob_edad_0003h"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 281, 640, data.get("pob_edad_0003m"), Element.ALIGN_RIGHT);
+            // SUPERFICIE
+            setText(pdfPage1, 281, 587, data.get("sup_agrit"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 281, 575, data.get("sup_ver"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 281, 564, data.get("sup_ver_sr"), Element.ALIGN_RIGHT);
 
-            setText(pdfPage1, 185, 629, data.get("pob_edad_0405"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 233, 629, data.get("pob_edad_0405h"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 281, 629, data.get("pob_edad_0405m"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 281, 552, data.get("sup_ver_r"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 281, 540, data.get("sup_barbec"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 281, 528, data.get("sup_descan"), Element.ALIGN_RIGHT);
 
-            setText(pdfPage1, 185, 617, data.get("pob_edad_0619"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 233, 617, data.get("pob_edad_0619h"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 281, 617, data.get("pob_edad_0619m"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 281, 516, data.get("sup_ganat"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 281, 504, data.get("sup_pastoc"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 281, 493, data.get("sup_paston"), Element.ALIGN_RIGHT);
 
-            setText(pdfPage1, 185, 605, data.get("pob_edad_2039"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 233, 605, data.get("pob_edad_2039h"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 281, 605, data.get("pob_edad_2039m"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 281, 481, data.get("sup_fort"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 281, 469, data.get("sup_forest"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 281, 457, data.get("sup_bosque"), Element.ALIGN_RIGHT);
 
-            setText(pdfPage1, 185, 593, data.get("pob_edad_4059"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 233, 593, data.get("pob_edad_4059h"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 281, 593, data.get("pob_edad_4059m"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 281, 445, data.get("sup_noagrt"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 281, 433, data.get("sup_otrast"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 281, 422, data.get("sup_total"), Element.ALIGN_RIGHT);
 
-            setText(pdfPage1, 185, 581, data.get("pob_edad_60mas"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 233, 581, data.get("pob_edad_60mash"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 281, 581, data.get("pob_edad_60masm"), Element.ALIGN_RIGHT);
+            // AGRICULTURA
+            setText(pdfPage1, 171, 361, data.get("ai_suptotal"), Element.ALIGN_RIGHT);
 
-            setText(pdfPage1, 185, 552, data.get("pob_total18amast"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 233, 552, data.get("pob_total18amash"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 281, 552, data.get("pob_total18amasm"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 48, 349, data.get("ai_cult1"), Element.ALIGN_LEFT);
+            setText(pdfPage1, 170, 349, data.get("ai_sup1"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 228, 349, data.get("ai_prod1"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 283, 349, data.get("ai_rend1"), Element.ALIGN_RIGHT);
 
-            setText(pdfPage1, 185, 532, data.get("pob_m1549t"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 48, 337, data.get("ai_cult2"), Element.ALIGN_LEFT);
+            setText(pdfPage1, 170, 337, data.get("ai_sup2"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 228, 337, data.get("ai_prod2"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 283, 337, data.get("ai_rend2"), Element.ALIGN_RIGHT);
 
-            setText(pdfPage1, 185, 500, data.get("pob_vivpartt"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 233, 500, data.get("pob_vivparth"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 281, 500, data.get("pob_vivpartm"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 48, 325, data.get("ai_cult3"), Element.ALIGN_LEFT);
+            setText(pdfPage1, 170, 325, data.get("ai_sup3"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 228, 325, data.get("ai_prod3"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 283, 325, data.get("ai_rend3"), Element.ALIGN_RIGHT);
 
-            setText(pdfPage1, 185, 480, data.get("pob_vivcolectt"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 233, 480, data.get("pob_vivcolecth"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 281, 480, data.get("pob_vivcolectm"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 48, 314, data.get("ai_cult4"), Element.ALIGN_LEFT);
+            setText(pdfPage1, 170, 314, data.get("ai_sup4"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 228, 314, data.get("ai_prod4"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 283, 314, data.get("ai_rend4"), Element.ALIGN_RIGHT);
 
-            setText(pdfPage1, 185, 460, data.get("pob_vivctranst"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 233, 460, data.get("pob_vivctransth"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 281, 460, data.get("pob_vivctranstm"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 171, 278, data.get("av_suptotal"), Element.ALIGN_RIGHT);
 
-            setText(pdfPage1, 185, 440, data.get("pob_vivcallet"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 233, 440, data.get("pob_vivcalleh"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 281, 440, data.get("pob_vivcallem"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 48, 266, data.get("av_cult1"), Element.ALIGN_LEFT);
+            setText(pdfPage1, 170, 266, data.get("av_sup1"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 228, 266, data.get("av_prod1"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 283, 266, data.get("av_rend1"), Element.ALIGN_RIGHT);
 
-            setText(pdfPage1, 185, 406, data.get("pob_inscregcivt"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 233, 406, data.get("pob_inscregcivh"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 281, 406, data.get("pob_inscregcivm"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 48, 254, data.get("av_cult2"), Element.ALIGN_LEFT);
+            setText(pdfPage1, 170, 254, data.get("av_sup2"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 228, 254, data.get("av_prod2"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 283, 254, data.get("av_rend2"), Element.ALIGN_RIGHT);
 
-            setText(pdfPage1, 185, 386, data.get("pob_tienecarnett"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 233, 386, data.get("pob_tienecarneth"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 281, 386, data.get("pob_tienecarnetm"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 48, 242, data.get("av_cult3"), Element.ALIGN_LEFT);
+            setText(pdfPage1, 170, 242, data.get("av_sup3"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 228, 242, data.get("av_prod3"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 283, 242, data.get("av_rend3"), Element.ALIGN_RIGHT);
 
-            // POBLACIÓN EMPADRONADA POR SEXO, SEGÚN IDIOMA EN EL QUE APRENDIÓ A HABLAR
-            setText(pdfPage1, 185, 321, data.get("idioma_ninez_ttotal"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 233, 321, data.get("idioma_ninez_htotalh"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 281, 321, data.get("idioma_ninez_mtotalm"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 48, 230, data.get("av_cult4"), Element.ALIGN_LEFT);
+            setText(pdfPage1, 170, 230, data.get("av_sup4"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 228, 230, data.get("av_prod4"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 283, 230, data.get("av_rend4"), Element.ALIGN_RIGHT);
 
-            setText(pdfPage1, 185, 309, data.get("idioma_ninez_tcastellano"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 233, 309, data.get("idioma_ninez_hcastellanoh"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 281, 309, data.get("idioma_ninez_mcastellanom"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 48, 219, data.get("av_cult5"), Element.ALIGN_LEFT);
+            setText(pdfPage1, 170, 219, data.get("av_sup5"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 228, 219, data.get("av_prod5"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 283, 219, data.get("av_rend5"), Element.ALIGN_RIGHT);
 
-            setText(pdfPage1, 185, 297, data.get("idioma_ninez_tquechua"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 233, 297, data.get("idioma_ninez_hquechua"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 281, 297, data.get("idioma_ninez_mquechua"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 48, 207, data.get("av_cult6"), Element.ALIGN_LEFT);
+            setText(pdfPage1, 170, 207, data.get("av_sup6"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 228, 207, data.get("av_prod6"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 283, 207, data.get("av_rend6"), Element.ALIGN_RIGHT);
 
-            setText(pdfPage1, 185, 285, data.get("idioma_ninez_taymara"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 233, 285, data.get("idioma_ninez_haymarah"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 281, 285, data.get("idioma_ninez_maymaram"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 48, 195, data.get("av_cult7"), Element.ALIGN_LEFT);
+            setText(pdfPage1, 170, 195, data.get("av_sup7"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 228, 195, data.get("av_prod7"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 283, 195, data.get("av_rend7"), Element.ALIGN_RIGHT);
 
-            setText(pdfPage1, 185, 273, data.get("idioma_ninez_tguarani"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 233, 273, data.get("idioma_ninez_hguarani"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 281, 273, data.get("idioma_ninez_mguarani"), Element.ALIGN_RIGHT);
+            // CONSTRUCCIONES E INSTALACIONES
+            setText(pdfPage1, 535, 652, data.get("ci_silos"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 535, 640, data.get("ci_segrano"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 535, 629, data.get("ci_inverna"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 535, 617, data.get("ci_carpas"), Element.ALIGN_RIGHT);
 
-            setText(pdfPage1, 185, 262, data.get("idioma_ninez_toficiales"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 233, 262, data.get("idioma_ninez_hoficiales"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 281, 262, data.get("idioma_ninez_moficiales"), Element.ALIGN_RIGHT);
+            // MAQUINARIA, EQUIPOS E IMPLEMENTOS AGRICOLAS
+            setText(pdfPage1, 535, 564, data.get("e_tractor"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 535, 552, data.get("e_trimotor"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 535, 540, data.get("e_cosmotor"), Element.ALIGN_RIGHT);
 
-            setText(pdfPage1, 185, 250, data.get("idioma_ninez_totros"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 233, 250, data.get("idioma_ninez_hotrosh"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 281, 250, data.get("idioma_ninez_motrosm"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 535, 528, data.get("e_enfmotor"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 535, 516, data.get("e_trimanua"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 535, 504, data.get("e_cosmanua"), Element.ALIGN_RIGHT);
 
-            setText(pdfPage1, 185, 238, data.get("idioma_ninez_textranjero"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 233, 238, data.get("idioma_ninez_hextranjero"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 281, 238, data.get("idioma_ninez_mextranjero"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 535, 493, data.get("e_enfmanua"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 535, 481, data.get("e_motocul"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 535, 469, data.get("e_eqfumiga"), Element.ALIGN_RIGHT);
 
-            setText(pdfPage1, 185, 226, data.get("idioma_ninez_tnohabla"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 233, 226, data.get("idioma_ninez_hnohablah"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 281, 226, data.get("idioma_ninez_mnohablam"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 535, 457, data.get("e_segadora"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 535, 445, data.get("e_ahtanima"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 535, 433, data.get("e_amtanima"), Element.ALIGN_RIGHT);
 
-            setText(pdfPage1, 185, 214, data.get("idioma_ninez_tsinespecificar"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 233, 214, data.get("idioma_ninez_hsinespecificarh"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 281, 214, data.get("idioma_ninez_msinespecificarm"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 535, 422, data.get("e_atmecan"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 535, 410, data.get("e_carrastr"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 535, 398, data.get("e_rastras"), Element.ALIGN_RIGHT);
 
-            // POBLACIÓN EMPADRONADA DE 6 A 19 AÑOS POR SEXO, SEGÚN ASISTENCIA ESCOLAR
-            setText(pdfPage1, 185, 170, data.get("asist_escolart"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 233, 170, data.get("asist_escolarh"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 281, 170, data.get("asist_escolarm"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 535, 387, data.get("e_tolvaabo"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 535, 375, data.get("e_sembrad"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 535, 363, data.get("e_lavahort"), Element.ALIGN_RIGHT);
 
-            setText(pdfPage1, 185, 158, data.get("asist_asistet"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 233, 158, data.get("asist_asisteh"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 281, 158, data.get("asist_asistem"), Element.ALIGN_RIGHT);
+            // MIEMBROS DE LA UPA POR ACTIVIDAD
+            setText(pdfPage1, 535, 310, data.get("ap_agricul"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 535, 299, data.get("ap_ganader"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 535, 287, data.get("ap_avicola"), Element.ALIGN_RIGHT);
 
-            setText(pdfPage1, 185, 147, data.get("asist_noasistet"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 233, 147, data.get("asist_noasisteh"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 281, 147, data.get("asist_noasistem"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 535, 275, data.get("ap_foresta"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 535, 263, data.get("ap_extracc"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 535, 251, data.get("ap_recolec"), Element.ALIGN_RIGHT);
 
-            setText(pdfPage1, 185, 135, data.get("asist_sinespecificart"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 233, 135, data.get("asist_sinespecificarh"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 281, 135, data.get("asist_sinespecificarm"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 535, 240, data.get("ap_caza"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 535, 228, data.get("ap_pisicol"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 535, 216, data.get("ap_noparti"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 535, 204, data.get("ap_total"), Element.ALIGN_RIGHT);
 
-            // LUGAR DONDE ACUDE LA POBLACIÓN CUANDO TIENEN PROBLEMAS DE SALUD
-            setText(pdfPage1, 441, 648, data.get("salud_cajat"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 489, 648, data.get("salud_cajah"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 537, 648, data.get("salud_cajam"), Element.ALIGN_RIGHT);
+            //ACTIVIDAD SECUMDARIA
+            setText(pdfPage1, 535, 180, data.get("as_mineria"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 535, 168, data.get("as_indmanu"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 535, 157, data.get("as_comerci"), Element.ALIGN_RIGHT);
 
-            setText(pdfPage1, 441, 632, data.get("salud_seguro_privadot"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 489, 632, data.get("salud_seguro_privadoh"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 537, 632, data.get("salud_seguro_privadom"), Element.ALIGN_RIGHT);
-
-            setText(pdfPage1, 441, 616, data.get("salud_publicot"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 489, 616, data.get("salud_publicoh"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 537, 616, data.get("salud_publicom"), Element.ALIGN_RIGHT);
-
-            setText(pdfPage1, 441, 595, data.get("salud_privadot"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 489, 595, data.get("salud_privadoh"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 537, 595, data.get("salud_privadom"), Element.ALIGN_RIGHT);
-
-            setText(pdfPage1, 441, 579, data.get("salud_medio_tradicionalt"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 489, 579, data.get("salud_medio_tradicionalh"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 537, 579, data.get("salud_medio_tradicionalm"), Element.ALIGN_RIGHT);
-
-            setText(pdfPage1, 441, 567, data.get("salud_solcaserast"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 489, 567, data.get("salud_solcaserash"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 537, 567, data.get("salud_solcaserasm"), Element.ALIGN_RIGHT);
-
-            setText(pdfPage1, 441, 555, data.get("salud_faramaciat"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 489, 555, data.get("salud_faramaciah"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 537, 555, data.get("salud_faramaciam"), Element.ALIGN_RIGHT);
-
-            // POBLACIÓN EMPADRONADA, POR SEXO, SEGÚN LUGAR DE NACIMIENTO Y RESIDENCIA HABITUAL
-            setText(pdfPage1, 441, 511, data.get("lugar_nacimientot"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 489, 511, data.get("lugar_nacimientoh"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 537, 511, data.get("lugar_nacimientom"), Element.ALIGN_RIGHT);
-
-            setText(pdfPage1, 441, 499, data.get("lugar_nacimiento_aquit"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 489, 499, data.get("lugar_nacimiento_aquih"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 537, 499, data.get("lugar_nacimiento_aquim"), Element.ALIGN_RIGHT);
-
-            setText(pdfPage1, 441, 488, data.get("lugar_nacimiento_otrolugart"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 489, 488, data.get("lugar_nacimiento_otrolugarh"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 537, 488, data.get("lugar_nacimiento_otrolugarm"), Element.ALIGN_RIGHT);
-
-            setText(pdfPage1, 441, 476, data.get("lugar_nacimiento_exteriort"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 489, 476, data.get("lugar_nacimiento_exteriorh"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 537, 476, data.get("lugar_nacimiento_exteriorm"), Element.ALIGN_RIGHT);
-
-            setText(pdfPage1, 441, 441, data.get("lugar_recidenciat"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 489, 441, data.get("lugar_recidenciah"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 537, 441, data.get("lugar_recidenciam"), Element.ALIGN_RIGHT);
-
-            setText(pdfPage1, 441, 429, data.get("lugar_recidencia_aquit"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 489, 429, data.get("lugar_recidencia_aquih"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 537, 429, data.get("lugar_recidencia_aquim"), Element.ALIGN_RIGHT);
-
-            setText(pdfPage1, 441, 417, data.get("lugar_recidencia_otrolugart"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 489, 417, data.get("lugar_recidencia_otrolugarh"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 537, 417, data.get("lugar_recidencia_otrolugarm"), Element.ALIGN_RIGHT);
-
-            setText(pdfPage1, 441, 405, data.get("lugar_recidencia_exteriort"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 489, 405, data.get("lugar_recidencia_exteriorh"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 537, 405, data.get("lugar_recidencia_exteriorm"), Element.ALIGN_RIGHT);
-
-            // POBLACIÓN EMPADRONADA DE 10 AÑOS O MÁS DE EDAD, SEGÚN ACTIVIDAD ECONÓMICA Y CATEGORIA OCUPACIONAL
-            setText(pdfPage1, 441, 361, data.get("actividad_total"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 489, 361, data.get("actividad_totalh"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 537, 361, data.get("actividad_totalm"), Element.ALIGN_RIGHT);
-
-            setText(pdfPage1, 441, 345, data.get("actividad_agricultura"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 489, 345, data.get("actividad_agriculturah"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 537, 345, data.get("actividad_agriculturam"), Element.ALIGN_RIGHT);
-
-            setText(pdfPage1, 441, 329, data.get("actividad_mineria"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 489, 329, data.get("actividad_mineriah"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 537, 329, data.get("actividad_mineriam"), Element.ALIGN_RIGHT);
-
-            setText(pdfPage1, 441, 317, data.get("actividad_industria"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 489, 317, data.get("actividad_industriah"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 537, 317, data.get("actividad_industriam"), Element.ALIGN_RIGHT);
-
-            setText(pdfPage1, 441, 301, data.get("actividad_electricidad"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 489, 301, data.get("actividad_electricidadh"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 537, 301, data.get("actividad_electricidadm"), Element.ALIGN_RIGHT);
-
-            setText(pdfPage1, 441, 284, data.get("actividad_construccion"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 489, 284, data.get("actividad_construccionh"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 537, 284, data.get("actividad_construccionm"), Element.ALIGN_RIGHT);
-
-            setText(pdfPage1, 441, 268, data.get("actividad_comercio"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 489, 268, data.get("actividad_comercioh"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 537, 268, data.get("actividad_comerciom"), Element.ALIGN_RIGHT);
-
-            setText(pdfPage1, 441, 252, data.get("actividad_otrosservicios"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 489, 252, data.get("actividad_otrosserviciosh"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 537, 252, data.get("actividad_otrosserviciosm"), Element.ALIGN_RIGHT);
-
-            setText(pdfPage1, 441, 240, data.get("actividad_sinespecificar"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 489, 240, data.get("actividad_sinespecificarh"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 537, 240, data.get("actividad_sinespecificarm"), Element.ALIGN_RIGHT);
-
-            setText(pdfPage1, 441, 228, data.get("actividad_descripsionincompleta"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 489, 228, data.get("actividad_descripsionincompletah"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 537, 228, data.get("actividad_descripsionincompletam"), Element.ALIGN_RIGHT);
-
-            // Categoría ocupacional
-            setText(pdfPage1, 441, 205, data.get("ocupacional_totalt"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 489, 205, data.get("ocupacional_totalh"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 537, 205, data.get("ocupacional_totalm"), Element.ALIGN_RIGHT);
-
-            setText(pdfPage1, 441, 193, data.get("ocupacional_obrerot"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 489, 193, data.get("ocupacional_obreroh"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 537, 193, data.get("ocupacional_obrerom"), Element.ALIGN_RIGHT);
-
-            setText(pdfPage1, 441, 181, data.get("ocupacional_hogart"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 489, 181, data.get("ocupacional_hogarh"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 537, 181, data.get("ocupacional_hogarm"), Element.ALIGN_RIGHT);
-
-            setText(pdfPage1, 441, 165, data.get("ocupacional_cuentapropiat"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 489, 165, data.get("ocupacional_cuentapropiah"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 537, 165, data.get("ocupacional_cuentapropiam"), Element.ALIGN_RIGHT);
-
-            setText(pdfPage1, 441, 149, data.get("ocupacional_sociot"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 489, 149, data.get("ocupacional_socioh"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 537, 149, data.get("ocupacional_sociom"), Element.ALIGN_RIGHT);
-
-            setText(pdfPage1, 441, 133, data.get("ocupacional_familiart"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 489, 133, data.get("ocupacional_familiarh"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 537, 133, data.get("ocupacional_familiarm"), Element.ALIGN_RIGHT);
-
-            setText(pdfPage1, 441, 112, data.get("ocupacional_cooperativistat"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 489, 112, data.get("ocupacional_cooperativistah"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 537, 112, data.get("ocupacional_cooperativistam"), Element.ALIGN_RIGHT);
-
-            setText(pdfPage1, 441, 96, data.get("ocupacional_sinespecificart"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 489, 96, data.get("ocupacional_sinespecificarh"), Element.ALIGN_RIGHT);
-            setText(pdfPage1, 537, 96, data.get("ocupacional_sinespecificarm"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 535, 145, data.get("as_constru"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 535, 133, data.get("as_transpo"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 535, 121, data.get("as_otros"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 535, 109, data.get("as_ninguna"), Element.ALIGN_RIGHT);
+            setText(pdfPage1, 535, 98, data.get("as_total"), Element.ALIGN_RIGHT);
 
             // Ccontenido en pagina 2
             PdfContentByte pdfPage2 = pdfStamper.getOverContent(2);
 
-            // Viviendas
-            setText(pdfPage2, 280, 699, data.get("total_viv"), Element.ALIGN_RIGHT);
-            setText(pdfPage2, 280, 687, data.get("viv_vivpart"), Element.ALIGN_RIGHT);
-            setText(pdfPage2, 280, 675, data.get("viv_vivcolec"), Element.ALIGN_RIGHT);
+            // GANADERIA
+            setText(pdfPage2, 281, 682, data.get("g_bovino"), Element.ALIGN_RIGHT);
+            setText(pdfPage2, 281, 669, data.get("g_bueyes"), Element.ALIGN_RIGHT);
+            setText(pdfPage2, 281, 658, data.get("g_bufalos"), Element.ALIGN_RIGHT);
 
-            // Disponibilidad de energía eléctrica
-            setText(pdfPage2, 280, 652, data.get("total_energia"), Element.ALIGN_RIGHT);
-            setText(pdfPage2, 280, 640, data.get("viv_sb_enrg_red"), Element.ALIGN_RIGHT);
-            setText(pdfPage2, 280, 628, data.get("viv_sb_enrg_otrfuente"), Element.ALIGN_RIGHT);
-            setText(pdfPage2, 280, 615, data.get("viv_sb_enrg_notiene"), Element.ALIGN_RIGHT);
+            setText(pdfPage2, 281, 646, data.get("g_ovino"), Element.ALIGN_RIGHT);
+            setText(pdfPage2, 281, 634, data.get("g_pgranja"), Element.ALIGN_RIGHT);
+            setText(pdfPage2, 281, 622, data.get("g_pcorral"), Element.ALIGN_RIGHT);
 
-            // Combustible o energía más utilizado para cocinar
-            setText(pdfPage2, 280, 592, data.get("total_combustible"), Element.ALIGN_RIGHT);
-            setText(pdfPage2, 280, 580, data.get("viv_sb_comb_gasgarraf"), Element.ALIGN_RIGHT);
-            setText(pdfPage2, 280, 569, data.get("viv_sb_comb_caneria"), Element.ALIGN_RIGHT);
-            setText(pdfPage2, 280, 557, data.get("viv_sb_comb_lenia"), Element.ALIGN_RIGHT);
-            setText(pdfPage2, 280, 545, data.get("viv_sb_comb_otros"), Element.ALIGN_RIGHT);
+            setText(pdfPage2, 281, 610, data.get("g_caprino"), Element.ALIGN_RIGHT);
+            setText(pdfPage2, 281, 598, data.get("g_llamas"), Element.ALIGN_RIGHT);
+            setText(pdfPage2, 281, 587, data.get("g_alpacas"), Element.ALIGN_RIGHT);
 
-            // Procedencia del agua que utilizan en la vivienda
-            setText(pdfPage2, 280, 521, data.get("total_sb_agua"), Element.ALIGN_RIGHT);
-            setText(pdfPage2, 280, 509, data.get("viv_sb_agua_red"), Element.ALIGN_RIGHT);
-            setText(pdfPage2, 280, 498, data.get("viv_sb_agua_ppublica"), Element.ALIGN_RIGHT);
-            setText(pdfPage2, 280, 486, data.get("viv_sb_agua_carro"), Element.ALIGN_RIGHT);
-            setText(pdfPage2, 280, 474, data.get("viv_sb_agua_pozo"), Element.ALIGN_RIGHT);
-            setText(pdfPage2, 280, 462, data.get("viv_sb_agua_lluvia"), Element.ALIGN_RIGHT);
-            setText(pdfPage2, 280, 450, data.get("viv_sb_agua_otros"), Element.ALIGN_RIGHT);
+            setText(pdfPage2, 281, 575, data.get("g_caballos"), Element.ALIGN_RIGHT);
+            setText(pdfPage2, 281, 563, data.get("g_mulas"), Element.ALIGN_RIGHT);
+            setText(pdfPage2, 281, 551, data.get("g_asnos"), Element.ALIGN_RIGHT);
 
-            // Desague del servicio sanitario
-            setText(pdfPage2, 535, 702, data.get("total_desague"), Element.ALIGN_RIGHT);
-            setText(pdfPage2, 535, 690, data.get("viv_sb_desgu_alcant"), Element.ALIGN_RIGHT);
-            setText(pdfPage2, 535, 678, data.get("viv_sb_desgu_camsept"), Element.ALIGN_RIGHT);
-            setText(pdfPage2, 535, 667, data.get("viv_sb_desgu_pozociego"), Element.ALIGN_RIGHT);
-            setText(pdfPage2, 535, 655, data.get("viv_sb_desgu_calle"), Element.ALIGN_RIGHT);
-            setText(pdfPage2, 535, 643, data.get("viv_sb_desgu_quebrada"), Element.ALIGN_RIGHT);
-            setText(pdfPage2, 535, 631, data.get("viv_sb_desgu_lago"), Element.ALIGN_RIGHT);
+            setText(pdfPage2, 281, 540, data.get("g_conejos"), Element.ALIGN_RIGHT);
+            setText(pdfPage2, 281, 528, data.get("g_cuyes"), Element.ALIGN_RIGHT);
+            setText(pdfPage2, 281, 516, data.get("g_avgranja"), Element.ALIGN_RIGHT);
+            setText(pdfPage2, 281, 504, data.get("g_avcorral"), Element.ALIGN_RIGHT);
 
-            // Eliminación de la basura
-            setText(pdfPage2, 535, 595, data.get("total_basura"), Element.ALIGN_RIGHT);
-            setText(pdfPage2, 535, 580, data.get("viv_basura_contened"), Element.ALIGN_RIGHT);
-            setText(pdfPage2, 535, 559, data.get("viv_basura_carro"), Element.ALIGN_RIGHT);
-            setText(pdfPage2, 535, 539, data.get("viv_basura_baldio"), Element.ALIGN_RIGHT);
-            setText(pdfPage2, 535, 523, data.get("viv_basura_rio"), Element.ALIGN_RIGHT);
-            setText(pdfPage2, 535, 511, data.get("viv_basura_queman"), Element.ALIGN_RIGHT);
-            setText(pdfPage2, 535, 499, data.get("viv_basura_entierran"), Element.ALIGN_RIGHT);
-            setText(pdfPage2, 535, 487, data.get("viv_basura_otros"), Element.ALIGN_RIGHT);
+            // CAZA Y PESCA
+            setText(pdfPage2, 535, 672, data.get("cp_caza"), Element.ALIGN_RIGHT);
+            setText(pdfPage2, 535, 661, data.get("cp_pesca"), Element.ALIGN_RIGHT);
+            setText(pdfPage2, 535, 649, data.get("cp_cria"), Element.ALIGN_RIGHT);
+
+            // INDICADORES
+            setText(pdfPage2, 535, 596, data.get("ind_supupa"), Element.ALIGN_RIGHT);
+            setText(pdfPage2, 535, 585, data.get("ind_psupr"), Element.ALIGN_RIGHT);
 
             pdfStamper.close(); // close pdfStamper
 

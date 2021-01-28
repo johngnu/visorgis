@@ -189,14 +189,11 @@
         // Glove Info
         domain.objects.popup = function (feature, map) {
             var predioDetails = '<div class="card-content">';
-            predioDetails += '<strong>depto_estadistico: ' + feature.data.departamento + '</strong><br>';
-            predioDetails += '<strong>prov_estadistico: ' + feature.data.provincia + '</strong><br>';
-            predioDetails += '<strong>mun_estadistico: ' + feature.data.municipio + '</strong><br>';
-            predioDetails += '<strong>nombreciudad: ' + feature.data.nombreciudad + '</strong><br>';
-            predioDetails += '<strong>pob_empadronada: ' + feature.data.pob_edad_tot + '</strong><br>';
-            predioDetails += '<strong>viviendas: ' + feature.data.viv_vivpart + '</strong><br>';
-            predioDetails += '<strong>pob_60años_mas: ' + feature.data.pob_edad_60mas + '</strong><br>';
-            predioDetails += '<strong>cod_ine: ' + feature.data.idmanzana + '</strong><br>';
+            predioDetails += '<strong>depto_estadistico: ' + feature.data.depto_estadistico + '</strong><br>';
+            predioDetails += '<strong>prov_estadistico: ' + feature.data.prov_estadistico + '</strong><br>';
+            predioDetails += '<strong>mun_estadistico: ' + feature.data.mun_estadistico + '</strong><br>';
+            predioDetails += '<strong>nom_comunidad: ' + feature.data.nom_comunidad + '</strong><br>';            
+            predioDetails += '<strong>cod_ine: ' + feature.data.cod_ine + '</strong><br>';
 
             predioDetails += '</div>';
             // info popup
@@ -259,12 +256,15 @@
                     var feature = e.features[0];
                     if (feature) {
                         // Get IdFeature
-                        var s = feature.fid;
-                        s = s.substring(s.indexOf('.') + 1);
+                        var id = feature.data.cod_ine;
+                        //console.log(feature);
+                        //s = s.substring(s.indexOf('.') + 1);
                         // Select Result Feature 
                         domain.objects.selectFeature(domain.objects.imap, feature, false);
                         // Open Popup Window
-                        domain.objects.popup(feature, domain.objects.imap);
+                        domain.objects.popup(feature, domain.objects.imap);   
+                        
+                        domain.objects.reporte(feature);
                     } else {
                         // No features found
                         console.log('notfound feature');
@@ -322,93 +322,96 @@
                 maxSegments: null,
                 keep: true
             });
-            this.canvas.events.on({
-                featureadded: function (e) {
-                    var feature = e.feature;
-                    feature.geometry.transform(
-                            new OpenLayers.Projection("EPSG:900913"),
-                            new OpenLayers.Projection("EPSG:4326")
-                            );
-                    $.ajax({
-                        url: domain.objects.activeSLayer.endPoint + '/ficha/selected',
-                        type: "GET",
-                        data: {geom: feature.geometry.toString()},
-                        success: function (data) {
-                            if (data.success) {
-                                // console.log(data.data);
-                                var ids = new Array();
-                                data.data.forEach(function (item, index) {
-                                    var f = domain.objects.featureFromText(item.geom);
-                                    domain.objects.selectFeature(map, f, false);
-                                    ids.push(item[domain.objects.activeSLayer.searchField]);
-                                });
+            
+            var featureaddedFunction = function (e) {
+                var feature = e.feature;
+                feature.geometry.transform(
+                        new OpenLayers.Projection("EPSG:900913"),
+                        new OpenLayers.Projection("EPSG:4326")
+                        );
+                $.ajax({
+                    url: domain.objects.activeSLayer.endPoint + '/ficha/selected',
+                    type: "GET",
+                    data: {geom: feature.geometry.toString()},
+                    success: function (data) {
+                        if (data.success) {
+                            // console.log(data.data);
+                            var ids = new Array();
+                            data.data.forEach(function (item, index) {
+                                var f = domain.objects.featureFromText(item.geom);
+                                domain.objects.selectFeature(map, f, false);
+                                ids.push(item[domain.objects.activeSLayer.searchField]);
+                            });
 
-                                $('#moreinfo').modal('toggle');
-                                $.ajax({
-                                    url: domain.objects.activeSLayer.endPoint + '/ficha/data',
-                                    type: "POST",
-                                    data: {ids: JSON.stringify(ids)},
-                                    dataType: 'json',
-                                    success: function (data) {
+                            $('#moreinfo').modal('toggle');
+                            $.ajax({
+                                url: domain.objects.activeSLayer.endPoint + '/ficha/data',
+                                type: "POST",
+                                data: {ids: JSON.stringify(ids)},
+                                dataType: 'json',
+                                success: function (data) {
 
-                                        var datas = data.data;
-                                        var serie_data = [
-                                            datas.pob_edad_0003,
-                                            datas.pob_edad_0405,
-                                            datas.pob_edad_0619,
-                                            datas.pob_edad_2039,
-                                            datas.pob_edad_4059,
-                                            datas.pob_edad_60mas
-                                        ];
+                                    var datas = data.data;
+                                    var serie_data = [
+                                        datas.pob_edad_0003,
+                                        datas.pob_edad_0405,
+                                        datas.pob_edad_0619,
+                                        datas.pob_edad_2039,
+                                        datas.pob_edad_4059,
+                                        datas.pob_edad_60mas
+                                    ];
 
-                                        var time = new Date().getTime();
-                                        $("#docContent").html('<embed src="'+ domain.objects.activeSLayer.endPoint +'/ficha/pdf?time=' + time + '" width="100%" height="200"><br/><a class="btn btn-primary btn-sm" href="'+ domain.objects.activeSLayer.endPoint + '/ficha/pdf?download=true">Descargar</a>')
-                                        Highcharts.chart('container', {
-                                            chart: {
-                                                type: 'column',
-                                                options3d: {
-                                                    enabled: true,
-                                                    alpha: 10,
-                                                    beta: 25,
-                                                    depth: 70
+                                    var time = new Date().getTime();
+                                    $("#docContent").html('<embed src="'+ domain.objects.activeSLayer.endPoint +'/ficha/pdf?time=' + time + '" width="100%" height="200"><br/><a class="btn btn-primary btn-sm" href="'+ domain.objects.activeSLayer.endPoint + '/ficha/pdf?download=true">Descargar</a>')
+                                    Highcharts.chart('container', {
+                                        chart: {
+                                            type: 'column',
+                                            options3d: {
+                                                enabled: true,
+                                                alpha: 10,
+                                                beta: 25,
+                                                depth: 70
+                                            }
+                                        },
+                                        title: {
+                                            text: 'Resumen'
+                                        },
+                                        subtitle: {
+                                            text: 'POBLACIÓN EMPADRONADA POR SEXO, SEGÚN GRUPO DE EDAD'
+                                        },
+                                        plotOptions: {
+                                            column: {
+                                                depth: 25
+                                            }
+                                        },
+                                        xAxis: {
+                                            categories: ["0-3", "4-5", "6-19", "20-39", "40-59", "60 y más"],
+                                            labels: {
+                                                skew3d: true,
+                                                style: {
+                                                    fontSize: '16px'
                                                 }
-                                            },
+                                            }
+                                        },
+                                        yAxis: {
                                             title: {
-                                                text: 'Resumen'
-                                            },
-                                            subtitle: {
-                                                text: 'POBLACIÓN EMPADRONADA POR SEXO, SEGÚN GRUPO DE EDAD'
-                                            },
-                                            plotOptions: {
-                                                column: {
-                                                    depth: 25
-                                                }
-                                            },
-                                            xAxis: {
-                                                categories: ["0-3", "4-5", "6-19", "20-39", "40-59", "60 y más"],
-                                                labels: {
-                                                    skew3d: true,
-                                                    style: {
-                                                        fontSize: '16px'
-                                                    }
-                                                }
-                                            },
-                                            yAxis: {
-                                                title: {
-                                                    text: null
-                                                }
-                                            },
-                                            series: [{
-                                                    name: 'Edad',
-                                                    data: serie_data
-                                                }]
-                                        });
-                                    }
-                                });
-                            }
+                                                text: null
+                                            }
+                                        },
+                                        series: [{
+                                                name: 'Edad',
+                                                data: serie_data
+                                            }]
+                                    });
+                                }
+                            });
                         }
-                    });
-                }
+                    }
+                });
+            };
+            
+            this.canvas.events.on({
+                //featureadded: featureaddedFunction                
             });
             // Draw control
             var drawControls = {
@@ -449,11 +452,81 @@
             var f = domain.objects.objectselected.getFeatureById(fid);
             domain.objects.imap.zoomToExtent(f.geometry.getBounds());
         };
+        
+        domain.objects.reporte = function (f) {
+            /*var feature = e.feature;
+            feature.geometry.transform(
+                    new OpenLayers.Projection("EPSG:900913"),
+                    new OpenLayers.Projection("EPSG:4326")
+                    );*/
 
+            $('#moreinfo').modal('toggle');
+            $.ajax({
+                url: domain.objects.activeSLayer.endPoint + '/ficha/unidata',
+                type: "POST",
+                data: {id: f.data.cod_ine},
+                dataType: 'json',
+                success: function (data) {
+
+                    var datas = data.data;
+                    var serie_data = [
+                        datas.sup_agrit,
+                        datas.sup_ganat,
+                        datas.sup_fort,
+                        datas.sup_noagrt
+                    ];
+
+                    var time = new Date().getTime();
+                    $("#docContent").html('<embed src="'+ domain.objects.activeSLayer.endPoint +'/ficha/pdf?time=' + time + '" width="100%" height="200"><br/><a class="btn btn-primary btn-sm" href="'+ domain.objects.activeSLayer.endPoint + '/ficha/pdf?download=true">Descargar</a>');
+                    Highcharts.chart('container', {
+                        chart: {
+                            type: 'column',
+                            options3d: {
+                                enabled: true,
+                                alpha: 10,
+                                beta: 25,
+                                depth: 70
+                            }
+                        },
+                        title: {
+                            text: datas.nom_comunidad
+                        },
+                        subtitle: {
+                            text: 'USO DE LA TIERRA SEGÚN SUPERFICIE'
+                        },
+                        plotOptions: {
+                            column: {
+                                depth: 25
+                            }
+                        },
+                        xAxis: {
+                            categories: ["Agrícola", "Ganadera", "Forestal", "No agrícola"],
+                            labels: {
+                                skew3d: true,
+                                style: {
+                                    fontSize: '16px'
+                                }
+                            }
+                        },
+                        yAxis: {
+                            title: {
+                                text: null
+                            }
+                        },
+                        series: [{
+                                name: 'Cantidad',
+                                data: serie_data
+                            }]
+                    });
+                }
+            });
+            
+        };
+                
         $(document).ready(function () {
             // N-Layers Array
             var layers = new Array();
-            layers.push({label: 'Comunidades', url: 'http://sigedv2.ine.gob.bo/geoserver/siged/', layer: 'siged:t_comunidades_cna_publicacion', searchField: 'cod_ine', endPoint: '<c:url value="/agropecuario"/>'});
+            layers.push({label: 'Comunidades', url: 'http://sigedv2.ine.gob.bo/geoserver/siged/', layer: 'siged:v_comunidades_productor', searchField: 'cod_ine', endPoint: '<c:url value="/agropecuario"/>'});
 
             // Create Map
             var map = domain.objects.mapa({layers: layers});
