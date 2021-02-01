@@ -68,14 +68,8 @@
         <div class="bcontainer">
             <div class="btn-group">                
                 <button type="button" class="btn btn-default" data-toggle="modal" data-target="#moreinfo">Detalles</button>
-                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
-                    Opciones <span class="caret"></span></button>
                 <ul class="dropdown-menu" role="menu">
                     <li><a href="#" id="_draw_select">Seleccionar</a></li>
-                    <!--<li role="separator" class="divider"></li>
-                    <li><a href="#" id="_draw_polygon">Polígono</a></li>
-                    <li><a href="#" id="_draw_point">Punto</a></li>
-                    <li><a href="#" id="_draw_line">Línea</a></li>-->
                     <li role="separator" class="divider"></li>
                     <li><a href="#" id="_clear_all">Limpiar todo</a></li>
                 </ul>                                
@@ -90,7 +84,7 @@
                 <div class="modal-header">
                     <form id="search-form"> 
                         <div class="input-group">
-                            <input name="txtSearch" type="text" class="form-control" placeholder="Buscar por ID..."/>
+                            <input name="txtSearch" type="text" class="form-control" placeholder="Buscar..."/>
                             <div class="input-group-btn">
                                 <button class="btn btn-primary" type="submit">
                                     <span class="glyphicon glyphicon-search"></span>
@@ -526,7 +520,7 @@
         $(document).ready(function () {
             // N-Layers Array
             var layers = new Array();
-            layers.push({label: 'Comunidades', url: 'http://sigedv2.ine.gob.bo/geoserver/siged/', layer: 'siged:v_comunidades_productor', searchField: 'cod_ine', endPoint: '<c:url value="/agropecuario"/>'});
+            layers.push({label: 'Comunidades', url: 'http://sigedv2.ine.gob.bo/geoserver/siged/', layer: 'siged:v_comunidades_productor', searchField: 'nom_comunidad', endPoint: '<c:url value="/agropecuario"/>'});
 
             // Create Map
             var map = domain.objects.mapa({layers: layers});
@@ -581,19 +575,19 @@
 
                 $('#search-form').submit(function () {
                     var search = $(this).find('input[name="txtSearch"]').val();
-                    //console.log(domain.objects.activeSLayer);
-                    if(domain.objects.activeSLayer.label === 'Manzanas') {
+                    var active = domain.objects.activeSLayer;
+                    if(domain.objects.activeSLayer) {
                         $.ajax({
                             method: 'POST',
-                            url: Ext.localProxy + 'http://sigedv2.ine.gob.bo:80/geoserver/siged/wfs',
+                            url: Ext.localProxy + active.url + "wfs",
                             data: {
                                 "service": "WFS",
                                 "request": "GetFeature",
-                                "typename": 'siged:v_perimetros',
+                                "typename": active.layer,
                                 "outputFormat": "application/json",
                                 "srsname": "EPSG:4326",
                                 "maxFeatures": 50,
-                                "CQL_FILTER": "strToLowerCase(nombreciudad) like '%" + search.toLowerCase() + "%'"
+                                "CQL_FILTER": "strToLowerCase("+ active.searchField +") like '%" + search.toLowerCase() + "%'"
                             },
                             success: function (response, status, xhr) {
                                 if (xhr.getResponseHeader('Content-Type') === 'application/json') {
@@ -610,11 +604,11 @@
                                         map.zoomToExtent(domain.objects.objectselected.getDataExtent());
                                         if(features.length > 1) {
                                             $('#nFeaturesDialog').modal('toggle');
-                                            var html = '<table class="table table-bordered"><thead><tr><th>Cod. Municipio</th><th>Nombre ciudad</th><th>Opción</th></tr></thead><tbody>';
+                                            var html = '<table class="table table-bordered"><thead><tr><th>Municipio</th><th>Comunidad</th><th>Opción</th></tr></thead><tbody>';
                                             domain.objects.objectselected.features.forEach(function (feature, index) {
                                                 // console.log(feature);
-                                                html = html + '<tr><td>' + feature.data.codigomunicipio + '</td>';
-                                                html = html + '<td>' + feature.data.nombreciudad + '</td>';
+                                                html = html + '<tr><td>' + feature.data.mun_estadistico + '</td>';
+                                                html = html + '<td>' + feature.data.nom_comunidad + '</td>';
                                                 html = html + '<td><button class="btn focusf" value="'+feature.id+'">ver</button></td></tr>';
                                             });    
                                             html = html + '</tbody></table>';
