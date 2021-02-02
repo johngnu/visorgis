@@ -446,6 +446,7 @@
         };
         
         domain.objects.focus = function (fid) {
+            console.log(fid);
             var f = domain.objects.objectselected.getFeatureById(fid);
             domain.objects.imap.zoomToExtent(f.geometry.getBounds());
         };
@@ -602,7 +603,7 @@
                                             html = html + '</tbody></table>';
                                             $('#_nresults_').html(html);
                                             $('.focusf').on('click', function () {                                            
-                                                //domain.objects.focus($(this).val());
+                                                domain.objects.focus($(this).val());
                                                 $('#nFeaturesDialog').modal('toggle');
                                             });
                                         }
