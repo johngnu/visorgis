@@ -6,6 +6,7 @@ package bo.gob.ine.web;
 import bo.gob.ine.services.IEntityServices;
 import com.google.gson.Gson;
 import com.icg.entityclassutils.EntityResult;
+import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.pdf.BaseFont;
@@ -17,8 +18,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -194,12 +200,27 @@ public class AgropecuarioController implements Serializable {
         Map<String, String> result = new HashMap<>();
         for (Entry<String, Object> e : map.entrySet()) {
             if (e.getValue() != null) {
-                result.put(e.getKey(), String.valueOf(e.getValue()));
+                // System.out.println(e.getKey() + " : " + e.getValue().getClass());
+                if ((e.getValue() instanceof BigInteger) || (e.getValue() instanceof BigDecimal)) {
+                    result.put(e.getKey(), formatNumber(new Double(e.getValue().toString())));
+                } else {
+                    result.put(e.getKey(), String.valueOf(e.getValue()));
+                }
             } else {
                 result.put(e.getKey(), "");
             }
         }
         return result;
+    }
+
+    private String formatNumber(Double db) {
+        DecimalFormat formatter = (DecimalFormat) NumberFormat.getInstance(Locale.getDefault());
+        DecimalFormatSymbols symbols = formatter.getDecimalFormatSymbols();
+
+        symbols.setGroupingSeparator('.');
+        symbols.setDecimalSeparator(',');
+        formatter.setDecimalFormatSymbols(symbols);
+        return formatter.format(db);
     }
 
     private void setText(PdfContentByte pdfPage, float x, float y, String text, int aligment) throws DocumentException, IOException {
@@ -209,12 +230,26 @@ public class AgropecuarioController implements Serializable {
                 BaseFont.CP1257, //Font encoding
                 BaseFont.EMBEDDED //Font embedded
         ), 7); // set font and size
-
+        pdfPage.setColorFill(BaseColor.BLACK);
         //pdfPage.setTextMatrix(x, y); // set x and y co-ordinates
         //0, 800 will write text on TOP LEFT of pdf page
         //0, 0 will write text on BOTTOM LEFT of pdf page
         //pdfPage.showText(text); // add the text
         //System.out.println("Text added in " + outputFilePath);        
+        pdfPage.showTextAligned(aligment, text, x, y, 0);
+
+        pdfPage.endText();
+    }
+
+    private void setTextWhite(PdfContentByte pdfPage, float x, float y, String text, int aligment) throws DocumentException, IOException {
+        // Add text in existing PDF
+        pdfPage.beginText();
+        pdfPage.setFontAndSize(BaseFont.createFont(BaseFont.HELVETICA, //Font name
+                BaseFont.CP1257, //Font encoding
+                BaseFont.EMBEDDED //Font embedded
+        ), 7); // set font and size
+
+        pdfPage.setColorFill(BaseColor.WHITE);
         pdfPage.showTextAligned(aligment, text, x, y, 0);
 
         pdfPage.endText();
@@ -239,7 +274,7 @@ public class AgropecuarioController implements Serializable {
             setText(pdfPage1, 160, 720, data.get("nom_comunidad"), Element.ALIGN_LEFT);  //LISTA DE COMUNIDADES
 
             // DATOS GENERALES
-            setText(pdfPage1, 240, 665, data.get("zonaagro"), Element.ALIGN_CENTER);
+            setTextWhite(pdfPage1, 240, 665, data.get("zonaagro"), Element.ALIGN_CENTER);
             setText(pdfPage1, 281, 652, data.get("nroupas"), Element.ALIGN_RIGHT);     // NUMERO DE COMUNIDADES
             setText(pdfPage1, 281, 640, data.get("nroupas"), Element.ALIGN_RIGHT);
 
