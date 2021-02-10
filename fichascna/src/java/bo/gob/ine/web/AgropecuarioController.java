@@ -16,6 +16,7 @@ import com.itextpdf.text.pdf.PdfStamper;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -227,7 +228,7 @@ public class AgropecuarioController implements Serializable {
         // Add text in existing PDF
         pdfPage.beginText();
         pdfPage.setFontAndSize(BaseFont.createFont(BaseFont.HELVETICA, //Font name
-                BaseFont.CP1257, //Font encoding
+                BaseFont.CP1252, //Font encoding
                 BaseFont.EMBEDDED //Font embedded
         ), 7); // set font and size
         pdfPage.setColorFill(BaseColor.BLACK);
@@ -245,7 +246,7 @@ public class AgropecuarioController implements Serializable {
         // Add text in existing PDF
         pdfPage.beginText();
         pdfPage.setFontAndSize(BaseFont.createFont(BaseFont.HELVETICA, //Font name
-                BaseFont.CP1257, //Font encoding
+                BaseFont.CP1252, //Font encoding
                 BaseFont.EMBEDDED //Font embedded
         ), 7); // set font and size
 
