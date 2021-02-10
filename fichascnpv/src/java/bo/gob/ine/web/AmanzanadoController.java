@@ -214,7 +214,7 @@ public class AmanzanadoController implements Serializable {
         // Add text in existing PDF
         pdfPage.beginText();
         pdfPage.setFontAndSize(BaseFont.createFont(BaseFont.HELVETICA, //Font name
-                BaseFont.CP1257, //Font encoding
+                BaseFont.CP1252, //Font encoding
                 BaseFont.EMBEDDED //Font embedded
         ), 7); // set font and size
 
