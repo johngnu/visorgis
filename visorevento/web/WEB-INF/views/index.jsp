@@ -163,9 +163,9 @@
                         <label>Gestión:</label>
                         <select id="gestion" class="form-control">
                             <option value="0">-- Seleccione --</option>
-                            <option value="1">2019</option>
-                            <option value="2">2020</option>
-                            <option value="3">2021</option>
+                            <option value="2019">2019</option>
+                            <option value="2020">2020</option>
+                            <option value="2021">2021</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -418,6 +418,8 @@
                 });
             }
 
+            var _gestion = $('#gestion');
+            var _mes = $('#mes');
             var _cpasado = $('#cpasado');
 
             // set combos
@@ -437,8 +439,26 @@
 
             _cpasado.change(function () {
                 var s = $(this).val();
+                var g = _gestion.val();
+                var m = _mes.val();
                 //selectExtraMap(s);
-                console.log(s);
+                //console.log(s);
+                $.ajax({
+                        url: '<c:url value="/datos/selected"/>',
+                        type: "GET",
+                        data: {gestion: g, mes: m, id_dato: s},
+                        success: function (data) {
+                            if (data.success) {
+                                // console.log(data.data);
+                                var ids = new Array();
+                                data.data.forEach(function (item, index) {
+                                    var f = domain.objects.featureFromText(item.geom);
+                                    domain.objects.selectFeature(map, f, false);
+                                    ids.push(item.idmanzana);
+                                });
+                            }
+                        }
+                    });
             });
 
 
