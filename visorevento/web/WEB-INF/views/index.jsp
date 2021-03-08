@@ -190,7 +190,7 @@
                     <div class="form-group">
                         <label>Evento Adverso:</label>
                         <select id="cpasado" class="form-control">
-                            <option>-- Seleccione --</option>
+                            <option value="0">-- Seleccione --</option>
                             <option value="1">Desbordado</option>
                             <option value="2">Deslizamiento</option>
                             <option value="3">Granizada</option>
@@ -279,8 +279,8 @@
 
             // Object selected layer
             this.objectselected = new OpenLayers.Layer.Vector("objectselected", {
-                displayInLayerSwitcher: false,
-                styleMap: domain.objects.styles  //style
+                displayInLayerSwitcher: false//,
+                //styleMap: domain.objects.styles  //style
             });
 
             map.addLayer(this.objectselected);
@@ -294,7 +294,7 @@
             map.events.register("zoomend", map, function (obj) {
                 // console.log(obj.layer.name);
                 // domain.objects.objectselected.refresh({force:true});
-                domain.objects.selectedInfo();
+                //domain.objects.selectedInfo();
             });
 
             map.events.register("loadend", map, function (obj) {
@@ -330,6 +330,23 @@
                 yx: {'EPSG:4326': true}
             });
             map.addLayer(muns);
+            /*
+            var demo = new OpenLayers.Layer.WMS('Demo', 'http://sigedv2.ine.gob.bo/geoserver/geonode/wms', {
+                layers: 'geonode:t_ipp_eventos',
+                transparent: true,
+                format: 'image/png'
+            }, {
+                buffer: 0,
+                displayOutsideMaxExtent: true,
+                isBaseLayer: false,
+                visibility: true,
+                singleTile: true,
+                yx: {'EPSG:4326': true}
+            });
+            map.addLayer(demo);
+            */
+            
+            
 
             if (!map.getCenter()) {
                 map.zoomToMaxExtent();
@@ -437,12 +454,12 @@
                 layers[index].idLayer = nl.id;
             });*/
 
-            _cpasado.change(function () {
-                var s = $(this).val();
+            function updatePuntos() {
+                var s = _cpasado.val();
                 var g = _gestion.val();
                 var m = _mes.val();
-                //selectExtraMap(s);
-                //console.log(s);
+                domain.objects.objectselected.removeAllFeatures();
+                if(g !== 0 && m !== 0) {
                 $.ajax({
                         url: '<c:url value="/datos/selected"/>',
                         type: "GET",
@@ -459,6 +476,17 @@
                             }
                         }
                     });
+                }    
+            }
+            
+            _mes.change(function () {
+                updatePuntos();
+            });
+            _gestion.change(function () {
+                updatePuntos();
+            });
+            _cpasado.change(function () {
+                updatePuntos();
             });
 
 
