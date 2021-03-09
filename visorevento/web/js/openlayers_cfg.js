@@ -22,7 +22,7 @@ domain.objects = {
     options: Ext.geoOptions,
     projection: Ext.geoProjection,
     featureFromText: function (the_geom, attrs) {
-        var feature = new OpenLayers.Feature.Vector(OpenLayers.Geometry.fromWKT(the_geom));
+        var feature = new OpenLayers.Feature.Vector(OpenLayers.Geometry.fromWKT(the_geom), attrs);        
         return feature;
     },
     selectFeature: function (map, feature, zoomto) {
@@ -119,7 +119,91 @@ domain.objects = {
                 })
             ]
         })
-    })
+    }),
+    eventStyle: new OpenLayers.Style(null, {
+            rules: [
+                new OpenLayers.Rule({
+                    filter: new OpenLayers.Filter.Comparison({
+                        type: OpenLayers.Filter.Comparison.EQUAL_TO,
+                        property: "evento",
+                        value: "Inundación"
+                    }),
+                    symbolizer: {
+                        "Polygon": {
+                            strokeWidth: 2,
+                            strokeOpacity: 1,
+                            fillOpacity: 0.5,
+                            fillColor: "#25d9dc",
+                            strokeColor: "#25d9dc"
+                        }
+                    }
+                }),
+                new OpenLayers.Rule({
+                    filter: new OpenLayers.Filter.Comparison({
+                        type: OpenLayers.Filter.Comparison.EQUAL_TO,
+                        property: "evento",
+                        value: "Desborde"
+                    }),
+                    symbolizer: {
+                        "Polygon": {
+                            strokeWidth: 2,
+                            strokeOpacity: 1,
+                            fillOpacity: 0.5,
+                            fillColor: "#56b056",
+                            strokeColor: "#56b056"
+                        }
+                    }
+                }),
+                new OpenLayers.Rule({
+                    filter: new OpenLayers.Filter.Comparison({
+                        type: OpenLayers.Filter.Comparison.EQUAL_TO,
+                        property: "evento",
+                        value: "Deslizamiento"
+                    }),
+                    symbolizer: {
+                        "Polygon": {
+                            strokeWidth: 2,
+                            strokeOpacity: 1,
+                            fillOpacity: 0.5,
+                            fillColor: "#f56d2d",
+                            strokeColor: "#f56d2d"
+                        }
+                    }
+                }),
+                new OpenLayers.Rule({
+                    filter: new OpenLayers.Filter.Comparison({
+                        type: OpenLayers.Filter.Comparison.EQUAL_TO,
+                        property: "evento",
+                        value: "Granizada"
+                    }),
+                    symbolizer: {
+                        "Polygon": {
+                            strokeWidth: 2,
+                            strokeOpacity: 1,
+                            fillOpacity: 0.5,
+                            fillColor: "#ec2df5",
+                            strokeColor: "#ec2df5"
+                        }
+                    }
+                }),
+                new OpenLayers.Rule({
+                    filter: new OpenLayers.Filter.Comparison({
+                        type: OpenLayers.Filter.Comparison.EQUAL_TO,
+                        property: "evento",
+                        value: "Riada"
+                    }),
+                    symbolizer: {
+                        "Polygon": {
+                            strokeWidth: 2,
+                            strokeOpacity: 1,
+                            fillOpacity: 0.5,
+                            fillColor: "#f2f52d",
+                            strokeColor: "#f2f52d"
+                        }
+                    }
+                })
+            ]
+        }) 
 };
 
 // Glove Info

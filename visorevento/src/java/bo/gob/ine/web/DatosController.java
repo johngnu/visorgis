@@ -33,20 +33,48 @@ public class DatosController {
 
     @RequestMapping(value = "/selected", method = RequestMethod.GET)
     @ResponseBody
-    public Map<String, Object> selected(@RequestParam Integer gestion, @RequestParam Integer mes, @RequestParam Integer id_dato) {
+    public Map<String, Object> selected(@RequestParam Integer gestion, @RequestParam Integer mes, @RequestParam String evento) {
         logger.info("GET selected data by params");
         Map<String, Object> data = new HashMap<>();
         try {
             String sql = "select dpto, prov, mun, comu, prod, st_astext(geom) as geom \n"                    
                     + "from agro.t_ipp_eventos \n"
                     + "where gestion = :gestion \n"
-                    + "and mes = :mes \n";
-                    //+ "and id_dato = :id_dato";
+                    + "and mes = :mes \n" 
+                    + "and \"" + evento + "\" is not null";
                     
             Map<String, Object> params = new HashMap<>();
             params.put("gestion", gestion);
             params.put("mes", mes);
             //params.put("id_dato", id_dato);
+            List<Map<String, Object>> res = dao.find(sql, params);
+
+            data.put("data", res);
+            data.put("success", Boolean.TRUE);
+        } catch (Exception e) {
+            logger.error("Error al obtener ejecutar SQL: " + e.getMessage());
+            data.put("success", Boolean.FALSE);
+            data.put("errorMessage", e.getMessage());
+        }
+        return data;
+    }
+    
+    @RequestMapping(value = "/videci", method = RequestMethod.GET)
+    @ResponseBody
+    public Map<String, Object> videci(@RequestParam Integer gestion, @RequestParam Integer mes, @RequestParam String evento) {
+        logger.info("GET selected data by params");
+        Map<String, Object> data = new HashMap<>();
+        try {
+            String sql = "select evento, departamento, municipio, st_astext(geom) as geom \n"                    
+                    + "from agro.tmp_videci_eventos \n"
+                    + "where anio = :anio \n"
+                    + "and mes = :mes \n" 
+                    + "and evento = :evento";
+                    
+            Map<String, Object> params = new HashMap<>();
+            params.put("anio", gestion);
+            params.put("mes", mes);
+            params.put("evento", evento);
             List<Map<String, Object>> res = dao.find(sql, params);
 
             data.put("data", res);

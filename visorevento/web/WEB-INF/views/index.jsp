@@ -191,24 +191,22 @@
                         <label>Evento Adverso:</label>
                         <select id="cpasado" class="form-control">
                             <option value="0">-- Seleccione --</option>
-                            <option value="1">Desbordado</option>
-                            <option value="2">Deslizamiento</option>
-                            <option value="3">Granizada</option>
-                            <option value="4">Inundación</option>
-                            <option value="5">Riada</option>
-                            <option value="6">6</option>
-                            <option value="7">7</option>
+                            <option value="c1_graniz">Granizo</option>
+                            <option value="c2_inunda">Inundación</option>
+                            <option value="c3_contam">Contaminación</option>
+                            <option value="c4_sequia">Sequía</option>
+                            <option value="c5_helada">Helada</option>
                         </select>
                     </div>
 
                     <hr>                    
                     <h5> <strong>Eventos Adversos (Fuente VIDECI):</strong></h5>
 
-                    <div class="checkbox"><label><input type="checkbox" name="_data_master" value="desborde_ene_20"> Desborde </label></div>
-                    <div class="checkbox"><label><input type="checkbox" name="_data_master" value="deslizamiento_ene_20"> Deslizamiento </label></div>
-                    <div class="checkbox"><label><input type="checkbox" name="_data_master" value="granizada_ene_20"> Granizada </label></div>
-                    <div class="checkbox"><label><input type="checkbox" name="_data_master" value="inundacion_ene_20"> Inundación </label></div>
-                    <div class="checkbox"><label><input type="checkbox" name="_data_master" value="riada_ene_20"> Riada </label></div>        
+                    <div class="checkbox"><label><input type="checkbox" name="_data_master" value="Desborde"> Desborde </label></div>
+                    <div class="checkbox"><label><input type="checkbox" name="_data_master" value="Deslizamiento"> Deslizamiento </label></div>
+                    <div class="checkbox"><label><input type="checkbox" name="_data_master" value="Granizada"> Granizada </label></div>
+                    <div class="checkbox"><label><input type="checkbox" name="_data_master" value="Inundación"> Inundación </label></div>
+                    <div class="checkbox"><label><input type="checkbox" name="_data_master" value="Riada"> Riada </label></div>        
 
                 </div>
             </div>
@@ -248,60 +246,40 @@
             );
             map.addLayer(ghyb);
 
-
-            // server features
-            /*
-             this.datawfs = new OpenLayers.Layer.Vector("Server WFS Data", {
-             strategies: [new OpenLayers.Strategy.BBOX()],
-             protocol: new OpenLayers.Protocol.WFS({
-             url: "http://sigedv2.ine.gob.bo/geoserver/wfs",
-             featurePrefix:"censo",
-             featureType: "t_ipp_eventos",  //"vw_ipp_eve_granizo_ene_20",                  
-             srsName: "EPSG:4326",
-             geometryName: "geom"                  
-             }),
-             displayInLayerSwitcher: true,
-             visibility: true
-             styleMap: domain.objects.styles
-             });
-             //map.addLayer(this.datawfs);
-             */
-
-            // Work layers
-            /*
-             this.canvas = new OpenLayers.Layer.Vector("canvas", {
-             displayInLayerSwitcher: false,
-             styleMap: domain.objects.styles
-             });
-             map.addLayer(this.canvas);
-             domain.objects.canvas = this.canvas;
-             */
-
             // Object selected layer
             this.objectselected = new OpenLayers.Layer.Vector("objectselected", {
-                displayInLayerSwitcher: false//,
-                //styleMap: domain.objects.styles  //style
+                displayInLayerSwitcher: false,
+                styleMap: domain.objects.styles
             });
 
             map.addLayer(this.objectselected);
-
-            // this.control = control;
-            map.events.register("changebaselayer", this, function (obj) {
-                // console.log(obj.layer.name);
+            
+            this.eventos = new OpenLayers.Layer.Vector("eventos", {
+                displayInLayerSwitcher: false,
+                styleMap: new OpenLayers.StyleMap({
+                    "default": domain.objects.eventStyle,
+                    "select": new OpenLayers.Style({
+                        fillColor: "fuchsia"
+                    })
+                })  //style
             });
 
-            //map.events.register("zoomend", map, zoomChanged);
+            map.addLayer(this.eventos);
+            
+            // this.control = control;
+            map.events.register("changebaselayer", this, function (obj) {
+
+            });
+
             map.events.register("zoomend", map, function (obj) {
-                // console.log(obj.layer.name);
-                // domain.objects.objectselected.refresh({force:true});
-                //domain.objects.selectedInfo();
+
             });
 
             map.events.register("loadend", map, function (obj) {
-                domain.objects.selectedInfo();
+
             });
 
-            //Departamentos
+            // Departamentos
             var deps = new OpenLayers.Layer.WMS('Límite departamental', 'http://sigedv2.ine.gob.bo/geoserver/geonode/wms', {
                 layers: 'geonode:departamentos_bolivia',
                 transparent: true,
@@ -316,7 +294,7 @@
             });
             map.addLayer(deps);
 
-            //Municipios
+            // Municipios
             var muns = new OpenLayers.Layer.WMS('Municipios', 'http://sigedv2.ine.gob.bo/geoserver/geonode/wms', {
                 layers: 'geonode:municipios_trans',
                 transparent: true,
@@ -330,23 +308,6 @@
                 yx: {'EPSG:4326': true}
             });
             map.addLayer(muns);
-            /*
-            var demo = new OpenLayers.Layer.WMS('Demo', 'http://sigedv2.ine.gob.bo/geoserver/geonode/wms', {
-                layers: 'geonode:t_ipp_eventos',
-                transparent: true,
-                format: 'image/png'
-            }, {
-                buffer: 0,
-                displayOutsideMaxExtent: true,
-                isBaseLayer: false,
-                visibility: true,
-                singleTile: true,
-                yx: {'EPSG:4326': true}
-            });
-            map.addLayer(demo);
-            */
-            
-            
 
             if (!map.getCenter()) {
                 map.zoomToMaxExtent();
@@ -355,60 +316,11 @@
 
             return map;
         };
-        // Selected Info
-        domain.objects.selectedInfo = function () {
-            domain.objects.objectselected.removeAllFeatures();
-            var favorite = [];
-            favorite.push(domain.objects.radio);
-            var html = '';
-            $.each($("input:checkbox[name='_data_master']:checked"), function () {
-                favorite.push($(this).val());
-            });
-            $('#_check_option').html(html);
-
-            /*
-             $.each(domain.objects.datawfs.features, function() {
-             var f = $(this)['0'];
-             var sum = 0;
-             favorite.forEach(function (item, index) {
-             sum = sum + parseInt(f['data'][item]);                            
-             });
-             sum = Math.round(sum/favorite.length);
-             
-             // create some attributes for the feature
-             var attributes = {name: "_result", datavalue: sum, municipio: f.data.municipio};
-             
-             var feature = new OpenLayers.Feature.Vector(f.geometry, attributes);                        
-             domain.objects.objectselected.addFeatures(feature);
-             });
-             */
-        };
-
 
         $(document).ready(function () {
-            // N-Layers Array
-            domain.objects.radio = $('select[name="_data_radio"]:selected').val();
-
-            // Precipitación layers
-            var geoserver_url = 'http://sigedv2.ine.gob.bo/geoserver/geonode/';
-            var layers = new Array();
-
-            // Primer grupo: Eventos IPP
-            layers.push({key: 'desborde_ene_20', label: 'Desbordado', url: 'http://sigedv2.ine.gob.bo/geoserver/geonode/', layer: 'geonode:desborde_enero', searchField: 'NombreMuni'});
-            layers.push({key: 'deslizamiento_ene_20', label: 'Deslizamiento', url: 'http://sigedv2.ine.gob.bo/geoserver/geonode/', layer: 'geonode:deslizamiento_enero', searchField: 'NombreMuni'});
-            layers.push({key: 'granizada_ene_20', label: 'Granizada', url: 'http://sigedv2.ine.gob.bo/geoserver/geonode/', layer: 'geonode:granizada_enero', searchField: 'NombreMuni'});
-            layers.push({key: 'inundacion_ene_20', label: 'Inundación', url: 'http://sigedv2.ine.gob.bo/geoserver/geonode/', layer: 'geonode:inundacion_enero', searchField: 'NombreMuni'});
-            layers.push({key: 'riada_ene_20', label: 'Riada', url: 'http://sigedv2.ine.gob.bo/geoserver/geonode/', layer: 'geonode:riada_enero', searchField: 'NombreMuni'});
-
-            // Segundo grupo: Eventos VIDECI
-            layers.push({id: 'mapa_1', group: 'pasado', label: 'Desbordes', url: geoserver_url, layer: 'geonode:vw_ipp_eve_granizo_ene_20'});
-            layers.push({id: 'mapa_2', group: 'pasado', label: 'Deslizamientos', url: geoserver_url, layer: 'geonode:vw_ipp_eve_inunda_ene_20'});
-            layers.push({id: 'mapa_3', group: 'pasado', label: 'Granizadas', url: geoserver_url, layer: 'geonode:vw_ipp_eve_granizo_ene_20'});
-            layers.push({id: 'mapa_4', group: 'pasado', label: 'Inundaciones', url: geoserver_url, layer: 'geonode:vw_ipp_eve_inunda_ene_20'});
-            layers.push({id: 'mapa_5', group: 'pasado', label: 'Riadas', url: geoserver_url, layer: 'geonode:vw_ipp_eve_granizo_ene_20'});
-
+            
             // Create Map
-            var map = domain.objects.mapa({layers: layers});
+            var map = domain.objects.mapa();
             domain.objects.imap = map;
 
             var controls = map.getControlsByClass('OpenLayers.Control.LayerSwitcher');
@@ -439,43 +351,35 @@
             var _mes = $('#mes');
             var _cpasado = $('#cpasado');
 
-            // set combos
-            /*layers.forEach(function (item, index) {
-                var opt = document.createElement('option');
-                opt.value = item.id;
-                opt.innerHTML = item.label;
-
-                if (item.group === 'pasado') {
-                    _cpasado.append(opt);
-                }
-
-                var nl = domain.objects.addDataLayer(item);
-                map.addLayer(nl);
-                layers[index].idLayer = nl.id;
-            });*/
-
+            function loadFeatureIn(feature) {
+                var geographic = new OpenLayers.Projection("EPSG:4326");
+                var mercator = new OpenLayers.Projection("EPSG:900913");
+                feature.geometry.transform(geographic, mercator);                     
+                domain.objects.eventos.addFeatures([feature]);
+            }
+            
             function updatePuntos() {
                 var s = _cpasado.val();
                 var g = _gestion.val();
                 var m = _mes.val();
                 domain.objects.objectselected.removeAllFeatures();
-                if(g !== 0 && m !== 0) {
-                $.ajax({
-                        url: '<c:url value="/datos/selected"/>',
-                        type: "GET",
-                        data: {gestion: g, mes: m, id_dato: s},
-                        success: function (data) {
-                            if (data.success) {
-                                // console.log(data.data);
-                                var ids = new Array();
-                                data.data.forEach(function (item, index) {
-                                    var f = domain.objects.featureFromText(item.geom);
-                                    domain.objects.selectFeature(map, f, false);
-                                    ids.push(item.idmanzana);
-                                });
+                if(g !== 0 && m !== 0 && s !== 0) {
+                    $.ajax({
+                            url: '<c:url value="/datos/selected"/>',
+                            type: "GET",
+                            data: {gestion: g, mes: m, evento: s},
+                            success: function (data) {
+                                if (data.success) {
+                                    // console.log(data.data);
+                                    var ids = new Array();
+                                    data.data.forEach(function (item, index) {
+                                        var f = domain.objects.featureFromText(item.geom);
+                                        domain.objects.selectFeature(map, f, false);
+                                        //ids.push(item.idmanzana);
+                                    });
+                                }
                             }
-                        }
-                    });
+                        });
                 }    
             }
             
@@ -489,46 +393,38 @@
                 updatePuntos();
             });
 
-
-            function selectExtraMap(s) {
-                layers.forEach(function (item, index) {
-                    var layer = map.getLayersBy('id', item.idLayer)[0];
-                    if (item.id === s) {
-                        layer.setVisibility(true);
-                    } else {
-                        layer.setVisibility(false);
-                    }
-                });
-            }
-
-
-            $('input:radio[name="_extra"]').change(function () {
-                var s = $(this).val();
-                selectExtraMap(s);
-            });
-
             $('input:checkbox[name="_data_master"]').change(function () {
-                //domain.objects.selectedInfo();
+                var g = _gestion.val();
+                var m = _mes.val();
                 var s = $(this).val();
-                layers.forEach(function (item, index) {
-                    var layer = map.getLayersBy('id', item.idLayer)[0];
-                    if (item.key === s) {
-                        layer.setVisibility(true);
-                    } else {
-                        layer.setVisibility(false);
-                    }
-                });
-
-                //var layer = map.getLayersBy('id', s)[0];  
-                //layer.setVisibility(true);
-            });
-
-            $('select[name="_data_radio"]').change(function () {
-                domain.objects.radio = $(this).val();
-                if (domain.objects.radio) {
-                    domain.objects.selectedInfo();
+                if($(this).prop("checked")) {
+                    $.ajax({
+                            url: '<c:url value="/datos/videci"/>',
+                            type: "GET",
+                            data: {gestion: g, mes: m, evento: s},
+                            success: function (data) {
+                                if (data.success) {
+                                    // console.log(data.data);
+                                    var ids = new Array();
+                                    data.data.forEach(function (item, index) {
+                                        var f = domain.objects.featureFromText(item.geom, {evento: item.evento});
+                                        loadFeatureIn(f);
+                                        //ids.push(item.idmanzana);
+                                    });
+                                }
+                            }
+                        });
+                } else {
+                    var af = new Array();
+                    domain.objects.eventos.features.forEach(function (item, index) {
+                        if (item.data.evento === s) {
+                            af.push(item);
+                        }
+                    });
+                    domain.objects.eventos.removeFeatures(af);
                 }
             });
+
         });
 
     </script>
