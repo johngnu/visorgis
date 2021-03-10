@@ -314,8 +314,7 @@
                     //toggleKey: "ctrlKey", // ctrl key removes from selection
                     //multipleKey: "shiftKey" // shift key adds to selection
                     //onSelect: function (e) { ... process feature hover ...  }, 
-                    clickFeature: function (e) { 
-                        console.log(e);
+                    clickFeature: function (e) {                         
                         domain.objects.popup(e, map); 
                     } 
                 }
