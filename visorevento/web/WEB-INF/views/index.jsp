@@ -371,7 +371,7 @@
                             success: function (data) {
                                 if (data.success) {
                                     // console.log(data.data);
-                                    var ids = new Array();
+                                    //var ids = new Array();
                                     data.data.forEach(function (item, index) {
                                         var f = domain.objects.featureFromText(item.geom);
                                         domain.objects.selectFeature(map, f, false);
@@ -385,35 +385,44 @@
             
             _mes.change(function () {
                 updatePuntos();
+                setvideciall(); 
             });
             _gestion.change(function () {
                 updatePuntos();
+                setvideciall(); 
             });
             _cpasado.change(function () {
                 updatePuntos();
             });
-
-            $('input:checkbox[name="_data_master"]').change(function () {
+            function setvideciall() {
+                $.each($("input:checkbox[name='_data_master']:checked"), function(){
+                    setvideci($(this).val(), true);
+                });
+            }    
+            
+            function setvideci(val, checked) {
                 var g = _gestion.val();
                 var m = _mes.val();
-                var s = $(this).val();
-                if($(this).prop("checked")) {
-                    $.ajax({
-                            url: '<c:url value="/datos/videci"/>',
-                            type: "GET",
-                            data: {gestion: g, mes: m, evento: s},
-                            success: function (data) {
-                                if (data.success) {
-                                    // console.log(data.data);
-                                    var ids = new Array();
-                                    data.data.forEach(function (item, index) {
-                                        var f = domain.objects.featureFromText(item.geom, {evento: item.evento});
-                                        loadFeatureIn(f);
-                                        //ids.push(item.idmanzana);
-                                    });
+                var s = val;
+                if(checked) {
+                    if(g !== 0 && m !== 0) {
+                        $.ajax({
+                                url: '<c:url value="/datos/videci"/>',
+                                type: "GET",
+                                data: {gestion: g, mes: m, evento: s},
+                                success: function (data) {
+                                    if (data.success) {
+                                        // console.log(data.data);
+                                        var ids = new Array();
+                                        data.data.forEach(function (item, index) {
+                                            var f = domain.objects.featureFromText(item.geom, {evento: item.evento});
+                                            loadFeatureIn(f);
+                                            //ids.push(item.idmanzana);
+                                        });
+                                    }
                                 }
-                            }
-                        });
+                            });
+                    }    
                 } else {
                     var af = new Array();
                     domain.objects.eventos.features.forEach(function (item, index) {
@@ -423,6 +432,11 @@
                     });
                     domain.objects.eventos.removeFeatures(af);
                 }
+            }    
+
+            $('input:checkbox[name="_data_master"]').change(function () {
+                var s = $(this).val();
+                setvideci(s, $(this).prop("checked"));
             });
 
         });
