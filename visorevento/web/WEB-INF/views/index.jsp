@@ -245,40 +245,7 @@
                     {type: google.maps.MapTypeId.HYBRID, numZoomLevels: 20}
             );
             map.addLayer(ghyb);
-
-            // Object selected layer
-            this.objectselected = new OpenLayers.Layer.Vector("objectselected", {
-                displayInLayerSwitcher: false,
-                styleMap: domain.objects.styles
-            });
-
-            map.addLayer(this.objectselected);
             
-            this.eventos = new OpenLayers.Layer.Vector("eventos", {
-                displayInLayerSwitcher: false,
-                styleMap: new OpenLayers.StyleMap({
-                    "default": domain.objects.eventStyle,
-                    "select": new OpenLayers.Style({
-                        fillColor: "fuchsia"
-                    })
-                })  //style
-            });
-
-            map.addLayer(this.eventos);
-            
-            // this.control = control;
-            map.events.register("changebaselayer", this, function (obj) {
-
-            });
-
-            map.events.register("zoomend", map, function (obj) {
-
-            });
-
-            map.events.register("loadend", map, function (obj) {
-
-            });
-
             // Departamentos
             var deps = new OpenLayers.Layer.WMS('Límite departamental', 'http://sigedv2.ine.gob.bo/geoserver/geonode/wms', {
                 layers: 'geonode:departamentos_bolivia',
@@ -308,6 +275,67 @@
                 yx: {'EPSG:4326': true}
             });
             map.addLayer(muns);
+            
+            this.eventos = new OpenLayers.Layer.Vector("eventos", {
+                displayInLayerSwitcher: false,
+                styleMap: new OpenLayers.StyleMap({
+                    "default": domain.objects.eventStyle,
+                    "select": new OpenLayers.Style({
+                        fillColor: "fuchsia"
+                    })
+                })  //style
+            });
+            map.addLayer(this.eventos);
+            
+            var layerListeners = {
+                featureclick: function(e) {
+                    //log(e.object.name + " says: " + e.feature.id + " clicked.");
+                    console.log(e.feature.data);
+                    return false;
+                },
+                nofeatureclick: function(e) {
+                    //log(e.object.name + " says: No feature clicked.");
+                }
+            };
+
+            // Object selected layer
+            this.objectselected = new OpenLayers.Layer.Vector("objectselected", {
+                displayInLayerSwitcher: false,
+                styleMap: domain.objects.styles,
+                eventListeners: layerListeners
+            });
+
+            map.addLayer(this.objectselected);
+
+            var selectControl = new OpenLayers.Control.SelectFeature (
+                [this.objectselected, this.eventos], {
+                    clickout: true, toggle: false,
+                    multiple: false, hover: false,
+                    //toggleKey: "ctrlKey", // ctrl key removes from selection
+                    //multipleKey: "shiftKey" // shift key adds to selection
+                    //onSelect: function (e) { ... process feature hover ...  }, 
+                    clickFeature: function (e) { 
+                        console.log(e);
+                        domain.objects.popup(e, map); 
+                    } 
+                }
+            );
+            
+            map.addControl(selectControl);
+            selectControl.activate();
+
+            // this.control = control;
+            map.events.register("changebaselayer", this, function (obj) {
+
+            });
+
+            map.events.register("zoomend", map, function (obj) {
+
+            });
+
+            map.events.register("loadend", map, function (obj) {
+
+            });
 
             if (!map.getCenter()) {
                 map.zoomToMaxExtent();
@@ -370,12 +398,10 @@
                             data: {gestion: g, mes: m, evento: s},
                             success: function (data) {
                                 if (data.success) {
-                                    // console.log(data.data);
-                                    //var ids = new Array();
+                                    // deploy
                                     data.data.forEach(function (item, index) {
-                                        var f = domain.objects.featureFromText(item.geom);
+                                        var f = domain.objects.featureFromText(item.geom, item);
                                         domain.objects.selectFeature(map, f, false);
-                                        //ids.push(item.idmanzana);
                                     });
                                 }
                             }
@@ -396,6 +422,7 @@
             });
             function setvideciall() {
                 $.each($("input:checkbox[name='_data_master']:checked"), function(){
+                    setvideci($(this).val(), false);
                     setvideci($(this).val(), true);
                 });
             }    
