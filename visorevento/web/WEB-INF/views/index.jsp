@@ -311,6 +311,7 @@
                 [this.objectselected, this.eventos], {
                     clickout: true, toggle: false,
                     multiple: false, hover: false,
+                    
                     //toggleKey: "ctrlKey", // ctrl key removes from selection
                     //multipleKey: "shiftKey" // shift key adds to selection
                     //onSelect: function (e) { ... process feature hover ...  }, 
