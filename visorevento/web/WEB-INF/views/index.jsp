@@ -290,7 +290,7 @@
             var layerListeners = {
                 featureclick: function(e) {
                     //log(e.object.name + " says: " + e.feature.id + " clicked.");
-                    console.log(e.feature.data);
+                    //console.log(e.feature.data);
                     return false;
                 },
                 nofeatureclick: function(e) {
@@ -314,8 +314,12 @@
                     //toggleKey: "ctrlKey", // ctrl key removes from selection
                     //multipleKey: "shiftKey" // shift key adds to selection
                     //onSelect: function (e) { ... process feature hover ...  }, 
-                    clickFeature: function (e) {                         
-                        domain.objects.popup(e, map); 
+                    clickFeature: function (e) {
+                        if(e.layer.name === 'objectselected') {
+                            domain.objects.popupPuntos(e, map); 
+                        } else {
+                            domain.objects.popup(e, map); 
+                        }
                     } 
                 }
             );
@@ -342,6 +346,28 @@
             map.zoomToExtent(Ext.geoBounds);
 
             return map;
+        };
+        
+        // Glove Info
+        domain.objects.popupPuntos = function (feature, map) {
+            var predioDetails = '<div class="card-content">';
+            var keys = ['dpto', 'prov', 'mun', 'comu', 'prod'];
+            keys.forEach(function (key, index) {
+                if(feature.data[key])
+                    predioDetails += '<strong>' + key + ': ' + feature.data[key] + '</strong><br>';        
+            });
+
+            predioDetails += '</div>';
+            // info popup
+            var popup = new OpenLayers.Popup.FramedCloud("PoputDetails",
+                    feature.geometry.bounds.getCenterLonLat(),
+                    new OpenLayers.Size(100, 100),
+                    predioDetails,
+                    null,
+                    true // <-- true if we want a close (X) button, false otherwise
+                    );
+            popup.autoSize = true;
+            map.addPopup(popup);
         };
 
         $(document).ready(function () {
