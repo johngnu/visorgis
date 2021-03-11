@@ -210,7 +210,9 @@ domain.objects = {
 domain.objects.popup = function (feature, map) {
     var predioDetails = '<div class="card-content">';
     for (var key in feature.data) {
-        predioDetails += '<strong>' + key + ': ' + feature.data[key] + '</strong><br>';
+        if(key !== 'geom') {
+           predioDetails += '<strong>' + key + ': ' + feature.data[key] + '</strong><br>';
+        }   
     }
 
     predioDetails += '</div>';
