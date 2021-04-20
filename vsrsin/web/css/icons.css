@@ -1,0 +1,128 @@
+
+.icon-user-add {background-image: url(/ext-3.3.1/examples/shared/icons/fam/user_add.gif)!important;}
+.icon-user-delete {background-image: url(/ext-3.3.1/examples/shared/icons/fam/user_delete.gif)!important;}
+.icon-user-save {background-image: url(/ext-3.3.1/examples/shared/icons/save.gif)!important;}
+
+.create {background-image: url(/ext-3.3.1/resources/images/silk/icons/add.png)!important;}
+.cancel {background-image: url(/ext-3.3.1/resources/images/silk/icons/cancel.png) !important;}
+.create_entity {background-image: url(/ext-3.3.1/resources/images/silk/icons/table_add.png)!important;}
+.eliminar {background-image: url(/ext-3.3.1/resources/images/silk/icons/delete.png)!important;}
+.history {background-image: url(/ext-3.3.1/resources/images/silk/icons/book_previous.png)!important;}
+.guardar {background-image: url(../img/iconos_visor/map_save.png)!important;}
+.editar {background-image: url(../img/iconos_visor/shape_square_edit.png)!important;}
+.update {background-image: url(/ext-3.3.1/resources/images/silk/icons/pencil.png)!important;}
+.ruler {background-image: url(../img/iconos_visor/ruler.png)!important;}
+.ruler_square {background-image: url(../img/iconos_visor/ruler_square.png)!important;}
+.navigate {background-image: url(../img/iconos_visor/mano.png)!important;}
+.magnifier {background-image: url(../img/iconos_visor/magnifier.png)!important;}
+.printer {background-image: url(../img/iconos_visor/printer.png)!important;}
+.attribute {background-image: url(../img/iconos_visor/star.png)!important;}
+.ojo {background-image: url(../img/iconos_visor/eye.png) !important;}
+.user {background-image: url(/ext-3.3.1/resources/images/silk/icons/user.png) !important;}
+.lock {background-image: url(/ext-3.3.1/resources/images/silk/icons/lock.png) !important;}
+.lock_edit {background-image: url(/ext-3.3.1/resources/images/silk/icons/lock_edit.png) !important;}
+.entity-save {background-image: url(/ext-3.3.1/resources/images/silk/icons/disk.png) !important;}
+.entity-undo {background-image: url(/ext-3.3.1/resources/images/silk/icons/arrow_undo.png) !important;}
+.entity-form {background-image: url(/ext-3.3.1/resources/images/silk/icons/application_form.png) !important;}
+.entity-grid {background-image: url(/ext-3.3.1/resources/images/silk/icons/database.png) !important;}
+.entity-grid-deleted {background-image: url(/ext-3.3.1/resources/images/silk/icons/database_delete.png) !important;}
+.entity-app {background-image: url(/ext-3.3.1/resources/images/silk/icons/database.png) !important;}
+.table-ok {background-image: url(/ext-3.3.1/resources/images/silk/icons/table.png) !important;}
+.table-error {background-image: url(/ext-3.3.1/resources/images/silk/icons/table_error.png) !important;}
+.module-app {background-image: url(/ext-3.3.1/docs/resources/cmp.gif) !important;}
+.open {background-image: url(/ext-3.3.1/resources/images/silk/icons/folder.png) !important;}
+.key {background-image: url(/ext-3.3.1/resources/images/silk/icons/key.png) !important;}
+.settings {background-image: url(/ext-3.3.1/resources/images/silk/icons/wrench_orange.png) !important;}
+.attr-visible {background-image: url(/ext-3.3.1/resources/images/silk/icons/eye.png) !important;}
+.arrow-up {background-image: url(/ext-3.3.1/resources/images/silk/icons/arrow_up.png) !important;}
+.arrow-down {background-image: url(/ext-3.3.1/resources/images/silk/icons/arrow_down.png) !important;}
+.security-app {background-image: url(/ext-3.3.1/resources/images/silk/icons/lock.png) !important;}
+.refresh {background-image: url(/ext-3.3.1/resources/images/silk/icons/arrow_refresh.png) !important;}
+.options {background-image: url(/ext-3.3.1/resources/images/silk/icons/cog.png) !important;}
+.disconnect {background-image: url(/ext-3.3.1/resources/images/silk/icons/disconnect.png) !important;}
+.lock_edit {background-image: url(/ext-3.3.1/resources/images/silk/icons/lock_edit.png) !important;}
+.copy {background-image: url(/ext-3.3.1/resources/images/silk/icons/page_copy.png) !important;}
+.paste {background-image: url(/ext-3.3.1/resources/images/silk/icons/page_paste.png) !important;}
+.inherit {background-image: url(/ext-3.3.1/resources/images/silk/icons/connect.png) !important;}
+.save {background-image: url(/ext-3.3.1/resources/images/silk/icons/disk.png) !important;}
+.image_add {background-image: url(/ext-3.3.1/resources/images/silk/icons/image_add.png) !important;}
+.disinherit {background-image: url(/ext-3.3.1/resources/images/silk/icons/disconnect.png) !important;}
+.information {background-image: url(/ext-3.3.1/resources/images/silk/icons/information.png) !important;}
+.featuremove {background-image: url(/ext-3.3.1/resources/images/silk/icons/shape_move_front.png) !important;}
+.featureextent {background-image: url(/ext-3.3.1/resources/images/silk/icons/shape_handles.png) !important;}
+.featureedit {background-image: url(/ext-3.3.1/resources/images/silk/icons/shape_square_edit.png) !important;}
+.canvasclean {background-image: url(/ext-3.3.1/resources/images/silk/new/trashcan_full.png) !important;}
+
+.nuevo{background-image: url(../img/iconos_visor/add.png); }
+.report{background-image: url(../img/iconos_visor/report.png); }
+.application_form{background-image: url(../img/iconos_visor/application_form.png); }
+.delete{background-image: url(/ext-3.3.1/resources/images/silk/icons/delete.png)!important;}
+.guardar{background-image: url(../img/iconos_visor/map_save.png);}
+.editar{background-image: url(../img/iconos_visor/shape_square_edit.png);}
+.ruler{background-image: url(../img/iconos_visor/ruler.png);}
+.ruler_square{background-image: url(../img/iconos_visor/ruler_square.png);}
+.navigate{background-image: url(../img/iconos_visor/mano.png);}
+.magnifier{background-image: url(../img/iconos_visor/magnifier.png);}
+.printer{background-image: url(../img/iconos_visor/printer.png);}
+.ojo{background-image: url(../img/iconos_visor/eye.png);}
+.anexar{background-image: url(../img/iconos_visor/map_add.png);}
+.dividir{background-image: url(../img/iconos_visor/map_delete.png);}
+.pdf2{background-image: url(../img/iconos_visor/page_white_acrobat.png);}
+.coord{background-image: url(../img/iconos_visor/map_coord.png);}
+.dibujar{background-image: url(../img/iconos_visor/map_edit.png);}
+.gps_con{background-image: url(../img/icon/connect.png);}
+.gps_lee{background-image: url(../img/icon/leer.png); }
+.gps_dis{background-image: url(../img/icon/disconnect.png);}
+.gps_pin{background-image: url(../img/icon/map-pin.png);}
+.gps_pol{background-image: url(../img/icon/crear-poli.png);}
+.add_point{background-image: url(../img/iconos_visor/vector_add.png);}
+.era_point{background-image: url(../img/iconos_visor/vector_delete.png);}
+.cle_point{background-image: url(../img/iconos_visor/vector.png);}
+.legend{background-image: url(../img/icon/tag_red.png);}
+.layers{background-image: url(../img/icon/layers.png);}
+.nuevo{background-image: url(../img/iconos_visor/add.png); }
+.delete{ background-image: url(../img/iconos_visor/delete.png);}
+.guardar{background-image: url(../img/iconos_visor/map_save.png);}
+.editar{background-image: url(../img/iconos_visor/shape_square_edit.png);}
+.ruler{background-image: url(../img/iconos_visor/ruler.png);}
+.ruler_square{background-image: url(../img/iconos_visor/ruler_square.png);}
+
+.zoomin{background-image: url(/ext-3.3.1/resources/images/silk/icons/zoom_in.png);}
+.zoomout{background-image: url(/ext-3.3.1/resources/images/silk/icons/zoom_out.png);}
+
+
+.navigate{background-image: url(../img/iconos_visor/mano.png);}
+.magnifier{background-image: url(../img/iconos_visor/magnifier.png);}
+.printer{background-image: url(../img/iconos_visor/printer.png);}
+.ojo{background-image: url(../img/iconos_visor/eye.png);}
+.anexar{background-image: url(../img/iconos_visor/map_add.png);}
+.dividir{background-image: url(../img/iconos_visor/map_delete.png);}
+.pdf{background-image: url(../img/iconos_visor/page_white_acrobat.png);}
+.coord{background-image: url(../img/iconos_visor/map_coord.png);}
+.dibujar{background-image: url(../img/iconos_visor/map_edit.png);}
+.gps_con{background-image: url(../img/icon/connect.png);}
+.gps_lee{background-image: url(../img/icon/leer.png); }
+.gps_dis{background-image: url(../img/icon/disconnect.png);}
+.gps_pin{background-image: url(../img/icon/map-pin.png);}
+.gps_pol{background-image: url(../img/icon/crear-poli.png);}
+.add_point{background-image: url(../img/iconos_visor/vector_add.png);}
+.era_point{background-image: url(../img/iconos_visor/vector_delete.png);}
+.cle_point{background-image: url(../img/iconos_visor/vector.png);}
+.legend{background-image: url(../img/icon/tag_red.png);}
+.layers{background-image: url(../img/icon/layers.png);}
+.finalizar{background-image: url(../img/iconos_visor/map_save.png);}
+.editardatos{background-image: url(../img/iconos_visor/map_edit.png);}
+.upload-icon {background: url('/ext-3.3.1/examples/shared/icons/fam/image_add.png') !important;}
+.magnifier_zoom_in{background:transparent url(../images/iconos_visor/magnifier_zoom_in.png) 0px 0px no-repeat !important;}
+.service {background-image: url(/ext-3.3.1/resources/images/silk/icons/cog.png) !important;}
+.server {background-image: url(/ext-3.3.1/resources/images/silk/icons/server.png) !important;}
+.server-add {background-image: url(/ext-3.3.1/resources/images/silk/icons/server_add.png) !important;}
+.server-delete {background-image: url(/ext-3.3.1/resources/images/silk/icons/server_delete.png) !important;}
+.play {background-image: url(/ext-3.3.1/resources/images/silk/icons/control_play.png) !important;}
+.pdf {background-image: url(/ext-3.3.1/resources/images/silk/icons/page_white_acrobat.png) !important;}
+.finishDoc {background-image: url(/ext-3.3.1/resources/images/silk/icons/page_green.png) !important;}
+.pendingDoc {background-image: url(/ext-3.3.1/resources/images/silk/icons/page_edit.png) !important;}
+.rejectedDoc {background-image: url(/ext-3.3.1/resources/images/silk/icons/page_delete.png) !important;}
+.ContinueTramite {background-image: url(/ext-3.3.1/resources/images/silk/icons/page_delete.png) !important;}
+.accept {background-image: url(/ext-3.3.1/resources/images/silk/icons/accept.png) !important;}
+.updateData {background-image: url(/ext-3.3.1/resources/images/silk/icons/disk_multiple.png) !important;}
