@@ -13,7 +13,7 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
         <meta name="author" content="@johngnu">
 
-        <title>Visor Impuestos</title>
+        <title>Visor SIN</title>
 
         <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport" />
         <meta name="viewport" content="width=device-width" />
@@ -157,8 +157,8 @@
                     <select name="_base_layers" class="form-control"></select>
 
                     <hr>                    
-                    <h5> <strong>Eventos Adversos IPP</strong></h5>
-
+                    <h5> <strong>_DATA_</strong></h5>
+                    <!--
                     <div class="form-group">
                         <label>Gestión:</label>
                         <select id="gestion" class="form-control">
@@ -207,7 +207,7 @@
                     <div class="checkbox"><label><input type="checkbox" name="_data_master" value="Granizada"> Granizada </label></div>
                     <div class="checkbox"><label><input type="checkbox" name="_data_master" value="Inundación"> Inundación </label></div>
                     <div class="checkbox"><label><input type="checkbox" name="_data_master" value="Riada"> Riada </label></div>        
-
+                    -->
                 </div>
             </div>
         </div>
@@ -300,7 +300,7 @@
 
             // Object selected layer
             this.objectselected = new OpenLayers.Layer.Vector("objectselected", {
-                displayInLayerSwitcher: false,
+                displayInLayerSwitcher: true,
                 styleMap: domain.objects.styles,
                 eventListeners: layerListeners
             });
@@ -491,7 +491,22 @@
                 var s = $(this).val();
                 setvideci(s, $(this).prop("checked"));
             });
-
+            
+            $.ajax({
+                url: '<c:url value="/geodata"/>',
+                type: "GET",
+                data: {view: 'cartografia.vw_demo_dep_act', field: 'graco'},
+                success: function (data) {
+                    if (data.success) {
+                        // deploy
+                        data.data.forEach(function (item, index) {
+                            var f = domain.objects.featureFromText(item.geom, item);
+                            domain.objects.selectFeature(map, f, false);
+                        });
+                    }
+                }
+            });
+            
         });
 
     </script>
