@@ -169,28 +169,7 @@
                         <label>_Field_:</label>
                         <select id="viewdata_detail" class="form-control"></select>
                     </div>
-                    <!--
-                    <div class="form-group">
-                        <label>Evento Adverso:</label>
-                        <select id="cpasado" class="form-control">
-                            <option value="0">-- Seleccione --</option>
-                            <option value="c1_graniz">Granizo</option>
-                            <option value="c2_inunda">Inundación</option>
-                            <option value="c3_contam">Contaminación</option>
-                            <option value="c4_sequia">Sequía</option>
-                            <option value="c5_helada">Helada</option>
-                        </select>
-                    </div>
-
-                    <hr>                    
-                    <h5> <strong>Eventos Adversos (Fuente VIDECI):</strong></h5>
-
-                    <div class="checkbox"><label><input type="checkbox" name="_data_master" value="Desborde"> Desborde </label></div>
-                    <div class="checkbox"><label><input type="checkbox" name="_data_master" value="Deslizamiento"> Deslizamiento </label></div>
-                    <div class="checkbox"><label><input type="checkbox" name="_data_master" value="Granizada"> Granizada </label></div>
-                    <div class="checkbox"><label><input type="checkbox" name="_data_master" value="Inundación"> Inundación </label></div>
-                    <div class="checkbox"><label><input type="checkbox" name="_data_master" value="Riada"> Riada </label></div>        
-                    -->
+                    
                 </div>
             </div>
         </div>
@@ -211,6 +190,7 @@
     <script type="text/javascript">
         // Create Style
         domain.objects.createStyle = function (max, min, color) {
+            // Gradient Color in 5 flags
             var colors = updateSpitter(color);
             var style = new OpenLayers.Style();
             var n = max - min;
