@@ -159,17 +159,30 @@
                     <h5> <strong>_DATA_</strong></h5>
 
                     <div class="form-group">
-                        <label>_Table_or_view_:</label>
+                        <label>Indicador:</label>
                         <select id="viewdata" class="form-control">
                             <option value="0">-- Seleccione --</option>
                         </select>
                     </div>
 
                     <div class="form-group">
-                        <label>_Field_:</label>
+                        <label>Categoria:</label>
                         <select id="viewdata_detail" class="form-control"></select>
                     </div>
                     
+                    <div class="form-group">
+                        <label>Región:</label>
+                        <select id="_region" class="form-control">
+                            <option value="dep">Departamento</option>
+                            <option value="pro">Provincia</option>
+                            <option value="mun">Municipio</option>
+                        </select>
+                    </div>
+                    
+                    <h5> <strong>Capas</strong></h5>
+                    <div class="radio"><label><input type="radio" checked name="_activo" value="act">Activo</label></div>
+                    <div class="radio"><label><input type="radio" name="_activo" value="inac">Inactivo</label></div>
+                                        
                 </div>
             </div>
         </div>
@@ -335,21 +348,33 @@
 
             // Static data
             var myData = [{
-                    label: 'Tabla ejemplo 1',
+                    label: 'Cat contribuyente',
                     schema: 'cartografia',
-                    tview: 'vw_demo_dep_act',
+                    tview: 'vw_cat_contribuyente',
                     fields: {graco: 'Graco', prico: 'Prico', resto: 'Resto', total: 'Total'},
                     color: '#ff4a4a'
                 }, {
-                    label: 'Tabla ejemplo 2',
+                    label: 'For jurídica',
                     schema: 'cartografia',
-                    tview: 'view1',
+                    tview: 'cw_for_juridica',
                     fields: {graco: 'Graco', prico: 'Prico', resto: 'Resto', total: 'Total'},
                     color: '#000000'
                 }, {
-                    label: 'Tabla ejemplo 3',
+                    label: 'Nro. empresas',
                     schema: 'cartografia',
-                    tview: 'view2',
+                    tview: 'vw_nro_empresas',
+                    fields: {graco: 'Graco', prico: 'Prico', resto: 'Resto', total: 'Total'},
+                    color: '#000000'
+                }, {
+                    label: 'Reg. tributario',
+                    schema: 'cartografia',
+                    tview: 'vw_nro_empresas',
+                    fields: {graco: 'Graco', prico: 'Prico', resto: 'Resto', total: 'Total'},
+                    color: '#000000'
+                }, {
+                    label: 'Tipo contribuyente',
+                    schema: 'cartografia',
+                    tview: 'vw_tipo_contribuyente',
                     fields: {graco: 'Graco', prico: 'Prico', resto: 'Resto', total: 'Total'},
                     color: '#000000'
                 }];
