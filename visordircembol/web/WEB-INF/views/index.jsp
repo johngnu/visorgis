@@ -156,11 +156,10 @@
                     <select name="_base_layers" class="form-control"></select>
 
                     <hr>                    
-                    <h5> <strong>_DATA_</strong></h5>
 
                     <div class="form-group">
                         <label>Indicador:</label>
-                        <select id="viewdata" class="form-control">
+                        <select id="_indicador" class="form-control">
                             <option value="0">-- Seleccione --</option>
                         </select>
                     </div>
@@ -348,6 +347,12 @@
 
             // Static data
             var myData = [{
+                    label: 'Demo',
+                    schema: 'cartografia',
+                    tview: 'vw_demo',
+                    fields: {graco: 'Graco', prico: 'Prico', resto: 'Resto', total: 'Total'},
+                    color: '#ff4a4a'
+                }, {
                     label: 'Cat contribuyente',
                     schema: 'cartografia',
                     tview: 'vw_cat_contribuyente',
@@ -446,22 +451,29 @@
             }
 
             // load data
-            var _viewdata = $('#viewdata');
+            var _indicador = $('#_indicador');
             var _viewdata_detail = $('#viewdata_detail');
+            var _region = $('#_region');
+            var _activo = $('input:radio[name="_activo"]:checked').val();
+            $('input:radio[name="_activo"]').change(function () {
+                _activo = $(this).val();
+                loadMainData();
+            });
 
             myData.forEach(function (item, index) {
                 var opt = document.createElement('option');
                 opt.value = item.schema + '.' + item.tview;
                 opt.innerHTML = item.label;
-                _viewdata.append(opt);
+                _indicador.append(opt);
             });
+            
             function defaultSelector() {
                 var opt = document.createElement('option');       
                 opt.value = 0;
                 opt.innerHTML = '-- Seleccione --';
                 _viewdata_detail.append(opt);
             }
-            _viewdata.change(function () {
+            _indicador.change(function () {
                 var s = $(this).val();
                 _viewdata_detail.empty();
                 myData.forEach(function (item, index) {
@@ -476,15 +488,26 @@
                         }
                     }
                 });
+                loadMainData();
             });
 
-            _viewdata_detail.change(function () {
-                domain.objects.objectselected.removeAllFeatures();
-                var s = $(this).val();
-                if(s !== '0') {
-                    loadMap(_viewdata.val(), s);
-                }
+            _viewdata_detail.change(function () {                
+                loadMainData();
             });
+            
+            _region.change(function () {                
+                loadMainData();
+            });
+            
+            function loadMainData() {
+                domain.objects.objectselected.removeAllFeatures();
+                var i = _indicador.val();
+                var v = _viewdata_detail.val();
+                var r = _region.val();                
+                var ly_data = i + '_' + r + '_' + _activo;
+                alert(ly_data); // borra esto
+                loadMap(ly_data, v);
+            }
 
         });
 
