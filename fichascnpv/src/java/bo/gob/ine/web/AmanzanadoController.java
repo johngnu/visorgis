@@ -563,8 +563,6 @@ public class AmanzanadoController implements Serializable {
             // Ccontenido en pagina 3
             PdfContentByte pdfPage3 = pdfStamper.getOverContent(3); //data_ids
 
-            //setText(pdfPage3, 160, 712, data.get("data_ids"), Element.ALIGN_LEFT);
-            //PdfContentByte cb = writer.DirectContent;
             ColumnText ct = new ColumnText(pdfPage3);
             ct.setSimpleColumn(new Phrase(new Chunk(data.get("data_ids"), FontFactory.getFont(FontFactory.HELVETICA, 10, Font.NORMAL))),
                     50, 700, 500, 36, 25, Element.ALIGN_LEFT | Element.ALIGN_TOP);

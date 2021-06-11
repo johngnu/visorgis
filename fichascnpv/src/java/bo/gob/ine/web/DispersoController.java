@@ -6,9 +6,14 @@ package bo.gob.ine.web;
 import bo.gob.ine.services.IEntityServices;
 import com.google.gson.Gson;
 import com.icg.entityclassutils.EntityResult;
+import com.itextpdf.text.Chunk;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.FontFactory;
+import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.ColumnText;
 import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfStamper;
@@ -191,6 +196,11 @@ public class DispersoController implements Serializable {
                     (Integer) res.get("viv_basura_otros");
             res.put("total_basura", bas);
             // fin sumas
+            StringBuilder sb = new StringBuilder();
+            for (String st : aids) {
+                sb.append(st).append(", ");
+            }
+            res.put("data_ids", sb.toString());
             // System.out.println(res);
             os = fichaOutputStream(convertStringMap(res));
 
@@ -550,6 +560,14 @@ public class DispersoController implements Serializable {
             setText(pdfPage2, 535, 499, data.get("viv_basura_entierran"), Element.ALIGN_RIGHT);
             setText(pdfPage2, 535, 487, data.get("viv_basura_otros"), Element.ALIGN_RIGHT);
 
+            // Ccontenido en pagina 3
+            PdfContentByte pdfPage3 = pdfStamper.getOverContent(3); //data_ids
+
+            ColumnText ct = new ColumnText(pdfPage3);
+            ct.setSimpleColumn(new Phrase(new Chunk(data.get("data_ids"), FontFactory.getFont(FontFactory.HELVETICA, 10, Font.NORMAL))),
+                    50, 700, 500, 36, 25, Element.ALIGN_LEFT | Element.ALIGN_TOP);
+            ct.go();
+            
             pdfStamper.close(); // close pdfStamper
 
             return os;
