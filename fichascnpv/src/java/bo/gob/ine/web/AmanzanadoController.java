@@ -6,9 +6,14 @@ package bo.gob.ine.web;
 import bo.gob.ine.services.IEntityServices;
 import com.google.gson.Gson;
 import com.icg.entityclassutils.EntityResult;
+import com.itextpdf.text.Chunk;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.FontFactory;
+import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.ColumnText;
 import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfStamper;
@@ -53,7 +58,8 @@ public class AmanzanadoController implements Serializable {
     @Autowired
     ServletContext servletContext;
     private OutputStream os;
-    
+    private static String INPUT_FILE = "/Ficha_INE_CNPV.pdf";
+
     @RequestMapping(value = "/ficha", method = RequestMethod.GET)
     @ResponseBody
     public Map<String, Object> ficha(@RequestParam String id) {
@@ -149,46 +155,52 @@ public class AmanzanadoController implements Serializable {
             Map<String, Object> res = sumData(er);
             res.put("num_manzano", aids.length);
             // vivienda
-            Integer sv = (Integer) res.get("viv_vivpart") + 
-                    (Integer) res.get("viv_vivcolec");
+            Integer sv = (Integer) res.get("viv_vivpart")
+                    + (Integer) res.get("viv_vivcolec");
             res.put("total_viv", sv);
             // disp. energ. elec.
-            Integer eel = (Integer) res.get("viv_sb_enrg_red") + 
-                    (Integer) res.get("viv_sb_enrg_otrfuente") + 
-                    (Integer) res.get("viv_sb_enrg_notiene");
+            Integer eel = (Integer) res.get("viv_sb_enrg_red")
+                    + (Integer) res.get("viv_sb_enrg_otrfuente")
+                    + (Integer) res.get("viv_sb_enrg_notiene");
             res.put("total_energia", eel);
             // combustible
-            Integer com = (Integer) res.get("viv_sb_comb_gasgarraf") + 
-                    (Integer) res.get("viv_sb_comb_caneria") + 
-                    (Integer) res.get("viv_sb_comb_lenia") +
-                    (Integer) res.get("viv_sb_comb_otros");
+            Integer com = (Integer) res.get("viv_sb_comb_gasgarraf")
+                    + (Integer) res.get("viv_sb_comb_caneria")
+                    + (Integer) res.get("viv_sb_comb_lenia")
+                    + (Integer) res.get("viv_sb_comb_otros");
             res.put("total_combustible", com);
             // Procedencia del agua
-            Integer agu = (Integer) res.get("viv_sb_agua_red") + 
-                    (Integer) res.get("viv_sb_agua_ppublica") + 
-                    (Integer) res.get("viv_sb_agua_carro") +
-                    (Integer) res.get("viv_sb_agua_pozo") +
-                    (Integer) res.get("viv_sb_agua_lluvia") +
-                    (Integer) res.get("viv_sb_agua_otros");
+            Integer agu = (Integer) res.get("viv_sb_agua_red")
+                    + (Integer) res.get("viv_sb_agua_ppublica")
+                    + (Integer) res.get("viv_sb_agua_carro")
+                    + (Integer) res.get("viv_sb_agua_pozo")
+                    + (Integer) res.get("viv_sb_agua_lluvia")
+                    + (Integer) res.get("viv_sb_agua_otros");
             res.put("total_sb_agua", agu);
             // Desague del servicio sanitario
-            Integer san = (Integer) res.get("viv_sb_desgu_alcant") + 
-                    (Integer) res.get("viv_sb_desgu_camsept") + 
-                    (Integer) res.get("viv_sb_desgu_pozociego") +
-                    (Integer) res.get("viv_sb_desgu_calle") +
-                    (Integer) res.get("viv_sb_desgu_quebrada") +
-                    (Integer) res.get("viv_sb_desgu_lago");
+            Integer san = (Integer) res.get("viv_sb_desgu_alcant")
+                    + (Integer) res.get("viv_sb_desgu_camsept")
+                    + (Integer) res.get("viv_sb_desgu_pozociego")
+                    + (Integer) res.get("viv_sb_desgu_calle")
+                    + (Integer) res.get("viv_sb_desgu_quebrada")
+                    + (Integer) res.get("viv_sb_desgu_lago");
             res.put("total_desague", san);
             // Desague del servicio sanitario
-            Integer bas = (Integer) res.get("viv_basura_contened") + 
-                    (Integer) res.get("viv_basura_carro") + 
-                    (Integer) res.get("viv_basura_baldio") +
-                    (Integer) res.get("viv_basura_rio") +
-                    (Integer) res.get("viv_basura_queman") +
-                    (Integer) res.get("viv_basura_entierran") +
-                    (Integer) res.get("viv_basura_otros");
+            Integer bas = (Integer) res.get("viv_basura_contened")
+                    + (Integer) res.get("viv_basura_carro")
+                    + (Integer) res.get("viv_basura_baldio")
+                    + (Integer) res.get("viv_basura_rio")
+                    + (Integer) res.get("viv_basura_queman")
+                    + (Integer) res.get("viv_basura_entierran")
+                    + (Integer) res.get("viv_basura_otros");
             res.put("total_basura", bas);
             // fin sumas
+            StringBuilder sb = new StringBuilder();
+            for (String st : aids) {
+                sb.append(st).append(", ");
+            }
+            res.put("data_ids", sb.toString());
+
             // System.out.println(res);
             os = fichaOutputStream(convertStringMap(res));
 
@@ -224,13 +236,13 @@ public class AmanzanadoController implements Serializable {
         //pdfPage.showText(text); // add the text
         //System.out.println("Text added in " + outputFilePath);        
         pdfPage.showTextAligned(aligment, text, x, y, 0);
-        
+
         pdfPage.endText();
     }
 
     private OutputStream fichaOutputStream(Map<String, String> data) {
         try {
-            String BLANK_FILE = servletContext.getRealPath("/input") + "/Ficha_INE_CNPV.pdf";
+            String BLANK_FILE = servletContext.getRealPath("/input") + INPUT_FILE;
 
             OutputStream os = new ByteArrayOutputStream();
             PdfReader pdfReader = new PdfReader(BLANK_FILE);
@@ -547,6 +559,16 @@ public class AmanzanadoController implements Serializable {
             setText(pdfPage2, 535, 511, data.get("viv_basura_queman"), Element.ALIGN_RIGHT);
             setText(pdfPage2, 535, 499, data.get("viv_basura_entierran"), Element.ALIGN_RIGHT);
             setText(pdfPage2, 535, 487, data.get("viv_basura_otros"), Element.ALIGN_RIGHT);
+
+            // Ccontenido en pagina 3
+            PdfContentByte pdfPage3 = pdfStamper.getOverContent(3); //data_ids
+
+            //setText(pdfPage3, 160, 712, data.get("data_ids"), Element.ALIGN_LEFT);
+            //PdfContentByte cb = writer.DirectContent;
+            ColumnText ct = new ColumnText(pdfPage3);
+            ct.setSimpleColumn(new Phrase(new Chunk(data.get("data_ids"), FontFactory.getFont(FontFactory.HELVETICA, 10, Font.NORMAL))),
+                    50, 700, 500, 36, 25, Element.ALIGN_LEFT | Element.ALIGN_TOP);
+            ct.go();
 
             pdfStamper.close(); // close pdfStamper
 

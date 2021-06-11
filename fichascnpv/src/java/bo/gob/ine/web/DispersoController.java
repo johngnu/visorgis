@@ -54,6 +54,7 @@ public class DispersoController implements Serializable {
     @Autowired
     ServletContext servletContext;
     private OutputStream os;
+    private static String INPUT_FILE = "/Ficha_INE_CNPV_DISPERSO.pdf";
 
     @RequestMapping(value = "/ficha", method = RequestMethod.GET)
     @ResponseBody
@@ -231,7 +232,7 @@ public class DispersoController implements Serializable {
 
     private OutputStream fichaOutputStream(Map<String, String> data) {
         try {
-            String BLANK_FILE = servletContext.getRealPath("/input") + "/Ficha_INE_CNPV.pdf";
+            String BLANK_FILE = servletContext.getRealPath("/input") + INPUT_FILE;
 
             OutputStream os = new ByteArrayOutputStream();
             PdfReader pdfReader = new PdfReader(BLANK_FILE);
