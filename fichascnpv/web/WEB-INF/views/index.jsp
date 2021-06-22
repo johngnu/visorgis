@@ -74,8 +74,9 @@
                     <li><a href="#" id="_draw_select">Seleccionar</a></li>
                     <!--<li role="separator" class="divider"></li>
                     <li><a href="#" id="_draw_polygon">Polígono</a></li>
-                    <li><a href="#" id="_draw_point">Punto</a></li>
-                    <li><a href="#" id="_draw_line">Línea</a></li>-->
+                    <li><a href="#" id="_draw_point">Punto</a></li>-->
+                    <li role="separator" class="divider"></li>
+                    <li><a href="#" id="_select_search">Enviar seleccionado</a></li>
                     <li role="separator" class="divider"></li>
                     <li><a href="#" id="_clear_all">Limpiar todo</a></li>
                 </ul>                                
@@ -331,7 +332,7 @@
                             );
                     $.ajax({
                         url: domain.objects.activeSLayer.endPoint + '/ficha/selected',
-                        type: "GET",
+                        type: "POST",
                         data: {geom: feature.geometry.toString()},
                         success: function (data) {
                             if (data.success) {
@@ -444,10 +445,11 @@
             map.zoomToExtent(Ext.geoBounds);
             return map;
         };
-        
+        domain.objects.searchSelect = null;
         domain.objects.focus = function (fid) {
             console.log(fid);
             var f = domain.objects.objectselected.getFeatureById(fid);
+            domain.objects.searchSelect = f;
             domain.objects.imap.zoomToExtent(f.geometry.getBounds());
         };
 
@@ -622,6 +624,13 @@
                     return false;
                 });
             }
+            
+            // search select
+            $('#_select_search').on('click', function () {
+                if(domain.objects.searchSelect !== null) {
+                    domain.objects.canvas.addFeatures([domain.objects.searchSelect]);
+                }    
+            });
 
             // reset all
             $('#_clear_all').on('click', function () {

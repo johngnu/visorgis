@@ -577,7 +577,7 @@ public class AmanzanadoController implements Serializable {
         }
     }
 
-    @RequestMapping(value = "/ficha/selected", method = RequestMethod.GET)
+    @RequestMapping(value = "/ficha/selected", method = RequestMethod.POST)
     @ResponseBody
     public Map<String, Object> selected(@RequestParam String geom) {
         logger.info("GET selected data by geom");
