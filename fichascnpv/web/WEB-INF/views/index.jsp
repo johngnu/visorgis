@@ -363,7 +363,7 @@
                                         ];
 
                                         var time = new Date().getTime();
-                                        $("#docContent").html('<embed src="'+ domain.objects.activeSLayer.endPoint +'/ficha/pdf?time=' + time + '" width="100%" height="200"><br/><a class="btn btn-primary btn-sm" href="'+ domain.objects.activeSLayer.endPoint + '/ficha/pdf?download=true">Descargar</a>')
+                                        $("#docContent").html('<embed src="'+ domain.objects.activeSLayer.endPoint +'/ficha/pdf?time=' + time + '" width="100%" height="200"><br/><a class="btn btn-primary btn-sm" href="'+ domain.objects.activeSLayer.endPoint + '/ficha/pdf?download=true">PDF</a>&nbsp;<a class="btn btn-success btn-sm" href="'+ domain.objects.activeSLayer.endPoint + '/ficha/xlsx">XLSX</a>');
                                         Highcharts.chart('container', {
                                             chart: {
                                                 type: 'column',
