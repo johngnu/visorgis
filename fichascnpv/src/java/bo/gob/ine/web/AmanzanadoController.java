@@ -18,6 +18,7 @@ import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfStamper;
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
@@ -27,6 +28,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import javax.servlet.ServletContext;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +64,9 @@ public class AmanzanadoController implements Serializable {
     @Autowired
     ServletContext servletContext;
     private OutputStream os;
+    private OutputStream osx;
     private static String INPUT_FILE = "/Ficha_INE_CNPV.pdf";
+    private static String EXCEL_TPL = "/Ficha_INE_CNPV.xlsx";
 
     @RequestMapping(value = "/ficha", method = RequestMethod.GET)
     @ResponseBody
@@ -142,6 +150,21 @@ public class AmanzanadoController implements Serializable {
         return null;
     }
 
+    @RequestMapping(value = "/ficha/xlsx", method = RequestMethod.GET)
+    public ResponseEntity<byte[]> fichaXlsx() {
+        try {
+            if (osx != null) {
+                final HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.valueOf("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+                headers.set("Content-Disposition", "inline; filename=\"report_database.xlsx\"");
+                return new ResponseEntity<>(((ByteArrayOutputStream) osx).toByteArray(), headers, HttpStatus.OK);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     @RequestMapping(value = "/ficha/data", method = RequestMethod.POST)
     @ResponseBody
     public Map<String, Object> fichaData(@RequestParam String ids, @RequestParam(required = false) Boolean download) {
@@ -203,6 +226,7 @@ public class AmanzanadoController implements Serializable {
 
             // System.out.println(res);
             os = fichaOutputStream(convertStringMap(res));
+            osx = xFichaOutputStream(er);
 
             data.put("data", res);
             data.put("success", Boolean.TRUE);
@@ -575,6 +599,58 @@ public class AmanzanadoController implements Serializable {
             e.printStackTrace();
             return null;
         }
+    }
+
+    private OutputStream xFichaOutputStream(EntityResult er) {
+        try {
+            // Open XLSX File template
+            String BLANK_FILE = servletContext.getRealPath("/input") + EXCEL_TPL;
+            FileInputStream file = new FileInputStream(BLANK_FILE);
+            Workbook workbook = new XSSFWorkbook(file);
+            // Select First or Defalut Sheet
+            Sheet sheet = workbook.getSheetAt(0);
+            
+            int startRow = 6;
+            int totalRows = er.getSize(); // total recor5ds (size data)
+
+            CellStyle newCellStyle = workbook.createCellStyle();
+            newCellStyle.cloneStyleFrom(sheet.getRow(startRow - 1).getCell(0).getCellStyle()); // Copy cell style
+
+            sheet.shiftRows(startRow, sheet.getLastRowNum(), totalRows - 1);
+
+            //sheet.shiftRows(7, 10, 7, true, true);
+            int indexReport = startRow - 1;
+
+            int i = 0;
+            for (Map<String, Object> rec : er.getListData()) {
+                Row w = sheet.getRow(indexReport + i);
+                if (w == null) {
+                    w = sheet.createRow(indexReport + i);
+                    w.createCell(0).setCellStyle(newCellStyle);
+                    w.createCell(1).setCellStyle(newCellStyle);
+                    w.createCell(2).setCellStyle(newCellStyle);
+                    w.createCell(3).setCellStyle(newCellStyle);
+                    w.createCell(4).setCellStyle(newCellStyle);
+                }
+                // values
+                w.getCell(0).setCellValue(rec.get("departamento").toString());
+                w.getCell(1).setCellValue(rec.get("provincia").toString());
+                w.getCell(2).setCellValue(rec.get("municipio").toString());
+                w.getCell(3).setCellValue(rec.get("comunidad").toString());
+                w.getCell(4).setCellValue(rec.get("cod_manzano").toString());
+                
+                i++;
+            }
+
+            OutputStream os = new ByteArrayOutputStream();
+            workbook.write(os);
+            os.close();
+            return os;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     @RequestMapping(value = "/ficha/selected", method = RequestMethod.POST)
