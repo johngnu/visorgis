@@ -655,15 +655,26 @@ public class AmanzanadoController implements Serializable {
 
     @RequestMapping(value = "/ficha/selected", method = RequestMethod.POST)
     @ResponseBody
-    public Map<String, Object> selected(@RequestParam String geom) {
+    public Map<String, Object> selected(@RequestParam String geom, @RequestParam Boolean drawn) {
         logger.info("GET selected data by geom");
         Map<String, Object> data = new HashMap<>();
         try {
-            String sql = "select data.idmanzana, st_astext(data.geom) as geom from \n"
+            System.out.println(drawn + " - " +geom);
+            String sql = "";
+            if (drawn) {
+                // st_intersects
+                sql = "select data.idmanzana, st_astext(data.geom) as geom from \n"
+                    + "(select *, st_intersects(st_geomfromtext(:geom, 4326),geom) \n"
+                    + "from amanzanado.v_fichamanzana) as data \n"
+                    + "where st_intersects = true";
+            } else {
+                // st_contains
+                sql = "select data.idmanzana, st_astext(data.geom) as geom from \n"
                     + "(select *, st_contains(st_geomfromtext(:geom, 4326),geom) \n"
                     + "from amanzanado.v_fichamanzana) as data \n"
                     + "where st_contains = true";
-
+            }
+            
             EntityResult er = service.nativeQueryFind(sql, geom);
 
             data.put("data", er.getListData());
