@@ -333,8 +333,9 @@
                     $.ajax({
                         url: domain.objects.activeSLayer.endPoint + '/ficha/selected',
                         type: "POST",
-                        data: {geom: feature.geometry.toString()},
+                        data: {geom: feature.geometry.toString(), drawn: domain.objects.drawn},
                         success: function (data) {
+                            domain.objects.drawn = false;
                             if (data.success) {
                                 // console.log(data.data);
                                 var ids = new Array();
@@ -445,9 +446,10 @@
             map.zoomToExtent(Ext.geoBounds);
             return map;
         };
+        domain.objects.drawn = false;
         domain.objects.searchSelect = null;
         domain.objects.focus = function (fid) {
-            console.log(fid);
+            //console.log(fid);
             var f = domain.objects.objectselected.getFeatureById(fid);
             domain.objects.searchSelect = f;
             domain.objects.imap.zoomToExtent(f.geometry.getBounds());
@@ -554,7 +556,9 @@
                                                 domain.objects.focus($(this).val());
                                                 $('#nFeaturesDialog').modal('toggle');
                                             });
-                                        }
+                                        } else {
+                                            domain.objects.focus(features[0].id);
+                                        }    
                                     } else {
                                         $('#notFoundDialog').modal('toggle');                                    
                                     }
@@ -628,6 +632,7 @@
             // search select
             $('#_select_search').on('click', function () {
                 if(domain.objects.searchSelect !== null) {
+                    domain.objects.drawn = true;
                     domain.objects.canvas.addFeatures([domain.objects.searchSelect]);
                 }    
             });
