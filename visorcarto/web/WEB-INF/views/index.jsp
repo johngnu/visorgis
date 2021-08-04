@@ -478,68 +478,51 @@
 
                                 $('#moreinfo').modal('toggle');
                                 var time = new Date().getTime();
-                                $("#docContent").html('<a class="btn btn-success btn-block" href="'+ domain.objects.activeSLayer.endPoint + '/ficha/xlsx">Descargar</a>');
-                                /*$.ajax({
-                                    url: domain.objects.activeSLayer.endPoint + '/ficha/data',
-                                    type: "POST",
-                                    data: {ids: JSON.stringify(ids)},
-                                    dataType: 'json',
-                                    success: function (data) {
+                                $("#docContent").html('<a class="btn btn-success btn-block" href="'+ domain.objects.activeSLayer.endPoint + '/ficha/xlsx">Descargar</a>');                                
+                            }
+                        }
+                    });
+        };
+        domain.objects.getDatas = function(features) {
+                    var arr = new Array();
+                    features.forEach(function (item, index) {
+                        item.geometry.transform(
+                            new OpenLayers.Projection("EPSG:900913"),
+                            new OpenLayers.Projection("EPSG:4326")
+                            );     
+                        arr.push(item.geometry.toString());    
+                    });
+                    /*feature.geometry.transform(
+                            new OpenLayers.Projection("EPSG:900913"),
+                            new OpenLayers.Projection("EPSG:4326")
+                            );*/
+                    $.ajax({
+                        url: domain.objects.activeSLayer.endPoint + '/getdata',
+                        type: "POST",
+                        //contentType: 'application/json',
+                        //data: {geom: feature.geometry.toString()},
+                        data: {geom: JSON.stringify(arr)}, //stringify is important
+                        success: function (data) {
+                            domain.objects.drawn = false;
+                            if (data.success) {
+                                // console.log(data.data);
+                                var ids = new Array();
+                                var fets = new Array();
+                                var geographic = new OpenLayers.Projection("EPSG:4326");
+                                var mercator = new OpenLayers.Projection("EPSG:900913");
+        
+                                data.data.forEach(function (item, index) {
+                                    var f = domain.objects.featureFromText(item.geom);
+                                    //domain.objects.selectFeature(map, f, false);
+                                    f.geometry.transform(geographic, mercator);
+                                    fets.push(f);
+                                    ids.push(item[domain.objects.activeSLayer.searchField]);
+                                });
+                                domain.objects.objectselected.addFeatures(fets);
 
-                                        var datas = data.data;
-                                        var serie_data = [
-                                            datas.pob_edad_0003,
-                                            datas.pob_edad_0405,
-                                            datas.pob_edad_0619,
-                                            datas.pob_edad_2039,
-                                            datas.pob_edad_4059,
-                                            datas.pob_edad_60mas
-                                        ];
-
-                                        var time = new Date().getTime();
-                                        $("#docContent").html('<embed src="'+ domain.objects.activeSLayer.endPoint +'/ficha/pdf?time=' + time + '" width="100%" height="200"><br/><a class="btn btn-primary btn-sm" href="'+ domain.objects.activeSLayer.endPoint + '/ficha/pdf?download=true">PDF</a>&nbsp;<a class="btn btn-success btn-sm" href="'+ domain.objects.activeSLayer.endPoint + '/ficha/xlsx">XLSX</a>');
-                                        Highcharts.chart('container', {
-                                            chart: {
-                                                type: 'column',
-                                                options3d: {
-                                                    enabled: true,
-                                                    alpha: 10,
-                                                    beta: 25,
-                                                    depth: 70
-                                                }
-                                            },
-                                            title: {
-                                                text: 'Resumen'
-                                            },
-                                            subtitle: {
-                                                text: 'POBLACIÓN EMPADRONADA POR SEXO, SEGÚN GRUPO DE EDAD'
-                                            },
-                                            plotOptions: {
-                                                column: {
-                                                    depth: 25
-                                                }
-                                            },
-                                            xAxis: {
-                                                categories: ["0-3", "4-5", "6-19", "20-39", "40-59", "60 y más"],
-                                                labels: {
-                                                    skew3d: true,
-                                                    style: {
-                                                        fontSize: '16px'
-                                                    }
-                                                }
-                                            },
-                                            yAxis: {
-                                                title: {
-                                                    text: null
-                                                }
-                                            },
-                                            series: [{
-                                                    name: 'Edad',
-                                                    data: serie_data
-                                                }]
-                                        });
-                                    }
-                                });*/
+                                $('#moreinfo').modal('toggle');
+                                var time = new Date().getTime();
+                                $("#docContent").html('<a class="btn btn-success btn-block" href="'+ domain.objects.activeSLayer.endPoint + '/ficha/xlsx">Descargar</a>');                                
                             }
                         }
                     });
@@ -725,6 +708,9 @@
                     //domain.objects.drawn = true;
                     //domain.objects.canvas.addFeatures([domain.objects.searchSelect]);
                     domain.objects.getData(domain.objects.searchSelect);
+                    domain.objects.searchSelect = null;
+                } else {
+                    domain.objects.getDatas(domain.objects.canvas.features);
                 }    
             });
 
