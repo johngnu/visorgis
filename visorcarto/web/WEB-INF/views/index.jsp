@@ -444,7 +444,7 @@
         domain.objects.drawn = false;
         domain.objects.searchSelect = null;
         domain.objects.focus = function (fid) {
-            //console.log(fid);
+            console.log(fid);
             var f = domain.objects.objectselected.getFeatureById(fid);
             console.log(f)
             domain.objects.searchSelect = f;
@@ -458,7 +458,7 @@
                     $.ajax({
                         url: domain.objects.activeSLayer.endPoint + '/getdata',
                         type: "POST",
-                        data: {geom: feature.geometry.toString()},
+                        data: {geom: JSON.stringify([feature.geometry.toString()])},
                         success: function (data) {
                             domain.objects.drawn = false;
                             if (data.success) {
@@ -481,6 +481,7 @@
                                 var time = new Date().getTime();
                                 $("#docContent").html('<a class="btn btn-success btn-block" href="'+ domain.objects.activeSLayer.endPoint + '/ficha/xlsx">Descargar</a>');                                
                             }
+                            //domain.objects.searchSelect = null;
                         }
                     });
         };
@@ -706,7 +707,7 @@
                     //domain.objects.drawn = true;
                     //domain.objects.canvas.addFeatures([domain.objects.searchSelect]);
                     domain.objects.getData(domain.objects.searchSelect);
-                    domain.objects.searchSelect = null;
+                    //domain.objects.searchSelect = null;
                 } else {
                     domain.objects.getDatas(domain.objects.canvas.features);
                 }    
