@@ -152,7 +152,7 @@ public class DispersoController implements Serializable {
         }
         return null;
     }
-    
+
     @RequestMapping(value = "/ficha/xlsx", method = RequestMethod.GET)
     public ResponseEntity<byte[]> fichaXlsx() {
         try {
@@ -181,44 +181,44 @@ public class DispersoController implements Serializable {
             Map<String, Object> res = sumData(er);
             res.put("num_manzano", aids.length);
             // vivienda
-            Integer sv = (Integer) res.get("viv_vivpart") + 
-                    (Integer) res.get("viv_vivcolec");
+            Integer sv = (Integer) res.get("viv_vivpart")
+                    + (Integer) res.get("viv_vivcolec");
             res.put("total_viv", sv);
             // disp. energ. elec.
-            Integer eel = (Integer) res.get("viv_sb_enrg_red") + 
-                    (Integer) res.get("viv_sb_enrg_otrfuente") + 
-                    (Integer) res.get("viv_sb_enrg_notiene");
+            Integer eel = (Integer) res.get("viv_sb_enrg_red")
+                    + (Integer) res.get("viv_sb_enrg_otrfuente")
+                    + (Integer) res.get("viv_sb_enrg_notiene");
             res.put("total_energia", eel);
             // combustible
-            Integer com = (Integer) res.get("viv_sb_comb_gasgarraf") + 
-                    (Integer) res.get("viv_sb_comb_caneria") + 
-                    (Integer) res.get("viv_sb_comb_lenia") +
-                    (Integer) res.get("viv_sb_comb_otros");
+            Integer com = (Integer) res.get("viv_sb_comb_gasgarraf")
+                    + (Integer) res.get("viv_sb_comb_caneria")
+                    + (Integer) res.get("viv_sb_comb_lenia")
+                    + (Integer) res.get("viv_sb_comb_otros");
             res.put("total_combustible", com);
             // Procedencia del agua
-            Integer agu = (Integer) res.get("viv_sb_agua_red") + 
-                    (Integer) res.get("viv_sb_agua_ppublica") + 
-                    (Integer) res.get("viv_sb_agua_carro") +
-                    (Integer) res.get("viv_sb_agua_pozo") +
-                    (Integer) res.get("viv_sb_agua_lluvia") +
-                    (Integer) res.get("viv_sb_agua_otros");
+            Integer agu = (Integer) res.get("viv_sb_agua_red")
+                    + (Integer) res.get("viv_sb_agua_ppublica")
+                    + (Integer) res.get("viv_sb_agua_carro")
+                    + (Integer) res.get("viv_sb_agua_pozo")
+                    + (Integer) res.get("viv_sb_agua_lluvia")
+                    + (Integer) res.get("viv_sb_agua_otros");
             res.put("total_sb_agua", agu);
             // Desague del servicio sanitario
-            Integer san = (Integer) res.get("viv_sb_desgu_alcant") + 
-                    (Integer) res.get("viv_sb_desgu_camsept") + 
-                    (Integer) res.get("viv_sb_desgu_pozociego") +
-                    (Integer) res.get("viv_sb_desgu_calle") +
-                    (Integer) res.get("viv_sb_desgu_quebrada") +
-                    (Integer) res.get("viv_sb_desgu_lago");
+            Integer san = (Integer) res.get("viv_sb_desgu_alcant")
+                    + (Integer) res.get("viv_sb_desgu_camsept")
+                    + (Integer) res.get("viv_sb_desgu_pozociego")
+                    + (Integer) res.get("viv_sb_desgu_calle")
+                    + (Integer) res.get("viv_sb_desgu_quebrada")
+                    + (Integer) res.get("viv_sb_desgu_lago");
             res.put("total_desague", san);
             // Desague del servicio sanitario
-            Integer bas = (Integer) res.get("viv_basura_contened") + 
-                    (Integer) res.get("viv_basura_carro") + 
-                    (Integer) res.get("viv_basura_baldio") +
-                    (Integer) res.get("viv_basura_rio") +
-                    (Integer) res.get("viv_basura_queman") +
-                    (Integer) res.get("viv_basura_entierran") +
-                    (Integer) res.get("viv_basura_otros");
+            Integer bas = (Integer) res.get("viv_basura_contened")
+                    + (Integer) res.get("viv_basura_carro")
+                    + (Integer) res.get("viv_basura_baldio")
+                    + (Integer) res.get("viv_basura_rio")
+                    + (Integer) res.get("viv_basura_queman")
+                    + (Integer) res.get("viv_basura_entierran")
+                    + (Integer) res.get("viv_basura_otros");
             res.put("total_basura", bas);
             // fin sumas
             StringBuilder sb = new StringBuilder();
@@ -262,7 +262,7 @@ public class DispersoController implements Serializable {
         //pdfPage.showText(text); // add the text
         //System.out.println("Text added in " + outputFilePath);        
         pdfPage.showTextAligned(aligment, text, x, y, 0);
-        
+
         pdfPage.endText();
     }
 
@@ -593,7 +593,7 @@ public class DispersoController implements Serializable {
             ct.setSimpleColumn(new Phrase(new Chunk(data.get("data_ids"), FontFactory.getFont(FontFactory.HELVETICA, 10, Font.NORMAL))),
                     50, 700, 500, 36, 25, Element.ALIGN_LEFT | Element.ALIGN_TOP);
             ct.go();
-            
+
             pdfStamper.close(); // close pdfStamper
 
             return os;
@@ -611,7 +611,7 @@ public class DispersoController implements Serializable {
             Workbook workbook = new XSSFWorkbook(file);
             // Select First or Defalut Sheet
             Sheet sheet = workbook.getSheetAt(0);
-            
+
             int startRow = 6;
             int totalRows = er.getSize(); // total recor5ds (size data)
 
@@ -655,7 +655,7 @@ public class DispersoController implements Serializable {
 
         return null;
     }
-    
+
     @RequestMapping(value = "/ficha/selected", method = RequestMethod.POST)
     @ResponseBody
     public Map<String, Object> selected(@RequestParam String geom) {
@@ -683,27 +683,28 @@ public class DispersoController implements Serializable {
     @ResponseBody
     public Map<String, Object> getData(@RequestParam String geom) {
         logger.info("GET selected data by geom");
-        Map<String, Object> data = new HashMap<>();        
+        Map<String, Object> data = new HashMap<>();
         try {
             Gson gson = new Gson();
             String[] geoms = gson.fromJson(geom, String[].class);
-            
+            System.out.println(geom);
+
             String sql = "select data.id_comunidad, data.depto, data.prov, data.mpio, data.ciu_com, data.localidad, "
                     + "data.cod_cd_com, data.cod_loc, data.at, "
                     + "data.cod_ac, data.t_viv_ocu, data.t_viv_des, data.total_viv, data.total_pob, "
                     + "st_astext(data.geom) as geom from \n"
-                    + "(select *, st_intersects(st_geomfromtext(:geom, 4326),geom) \n"
+                    + "(select *, st_contains(st_geomfromtext(:geom, 4326),geom) \n"
                     + "from ad_bol.bolivia_com_loc) as data \n"
-                    + "where st_intersects = true";
-            
+                    + "where st_contains = true";
+
             List<Map<String, Object>> res = new ArrayList();
             for (String g : geoms) {
                 EntityResult er = service.nativeQueryFind(sql, g);
                 res.addAll(er.getListData());
             }
-                                                
+
             osx = xReportOutputStream(res);
-            
+
             data.put("data", res);
             data.put("success", Boolean.TRUE);
         } catch (Exception e) {
@@ -713,17 +714,20 @@ public class DispersoController implements Serializable {
         }
         return data;
     }
+
     private String toString(Object o) {
-        if(o != null) {
+        if (o != null) {
             return o.toString();
         }
         return "";
     }
+
     private void setNumber(Cell c, Object o) {
-        if(o != null) {
-             c.setCellValue(Double.parseDouble(o.toString()));
-        }        
+        if (o != null) {
+            c.setCellValue(Double.parseDouble(o.toString()));
+        }
     }
+
     private OutputStream xReportOutputStream(List<Map<String, Object>> er) {
         try {
             // Open XLSX File template
@@ -732,15 +736,15 @@ public class DispersoController implements Serializable {
             Workbook workbook = new XSSFWorkbook(file);
             // Select First or Defalut Sheet
             Sheet sheet = workbook.getSheetAt(0);
-            
+
             int startRow = 6;
             int totalRows = er.size(); // total recor5ds (size data)
 
             CellStyle newCellStyle = workbook.createCellStyle();
             newCellStyle.cloneStyleFrom(sheet.getRow(startRow - 1).getCell(0).getCellStyle()); // Copy cell style
-
-            sheet.shiftRows(startRow, sheet.getLastRowNum(), totalRows - 1);
-
+            if ((totalRows - 1) > 0) {
+                sheet.shiftRows(startRow, sheet.getLastRowNum(), totalRows - 1);
+            }
             //sheet.shiftRows(7, 10, 7, true, true);
             int indexReport = startRow - 1;
 
@@ -767,7 +771,7 @@ public class DispersoController implements Serializable {
                 w.getCell(1).setCellValue(toString(rec.get("depto")));
                 w.getCell(2).setCellValue(toString(rec.get("prov")));
                 w.getCell(3).setCellValue(toString(rec.get("mpio")));
-                w.getCell(4).setCellValue(toString(rec.get("ciu_com")));                
+                w.getCell(4).setCellValue(toString(rec.get("ciu_com")));
                 w.getCell(5).setCellValue(toString(rec.get("localidad")));
                 w.getCell(6).setCellValue(toString(rec.get("at")));
                 w.getCell(7).setCellValue(toString(rec.get("cod_ac")));
@@ -776,7 +780,7 @@ public class DispersoController implements Serializable {
                 setNumber(w.getCell(9), rec.get("t_viv_des"));
                 setNumber(w.getCell(10), rec.get("total_viv"));
                 setNumber(w.getCell(11), rec.get("total_pob"));
-                
+
                 i++;
             }
 
@@ -790,5 +794,5 @@ public class DispersoController implements Serializable {
 
         return null;
     }
-    
+
 }
