@@ -13,7 +13,7 @@
         <link rel="icon" type="image/png" href="img/logo.png" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-        <title>VisorCarto</title>
+        <title>Visorcarto</title>
 
         <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport" />
         <meta name="viewport" content="width=device-width" />
@@ -91,7 +91,7 @@
                 <div class="modal-header">
                     <form id="search-form"> 
                         <div class="input-group">
-                            <input name="txtSearch" type="text" class="form-control" placeholder="Buscar por ID..."/>
+                            <input name="txtSearch" type="text" class="form-control" placeholder="Buscar..."/>
                             <div class="input-group-btn">
                                 <button class="btn btn-primary" type="submit">
                                     <span class="glyphicon glyphicon-search"></span>
@@ -446,6 +446,7 @@
         domain.objects.focus = function (fid) {
             //console.log(fid);
             var f = domain.objects.objectselected.getFeatureById(fid);
+            console.log(f)
             domain.objects.searchSelect = f;
             domain.objects.imap.zoomToExtent(f.geometry.getBounds());
         };
@@ -492,10 +493,7 @@
                             );     
                         arr.push(item.geometry.toString());    
                     });
-                    /*feature.geometry.transform(
-                            new OpenLayers.Projection("EPSG:900913"),
-                            new OpenLayers.Projection("EPSG:4326")
-                            );*/
+
                     $.ajax({
                         url: domain.objects.activeSLayer.endPoint + '/getdata',
                         type: "POST",
@@ -531,8 +529,8 @@
         $(document).ready(function () {
             // N-Layers Array
             var layers = new Array();
-            layers.push({label: 'Manzanas', url: 'http://sigedv2.ine.gob.bo/geoserver/siged/', layer: 'siged:v_fichamanzana', searchField: 'idmanzana', endPoint: '<c:url value="/amanzanado"/>'});
-            layers.push({label: 'Disperso', url: 'http://sigedv2.ine.gob.bo/geoserver/siged/', layer: 'siged:v_fichadisperso', searchField: 'idcomunidad', endPoint: '<c:url value="/disperso"/>'});
+            layers.push({label: 'Manzanas', url: 'http://sigedv2.ine.gob.bo/geoserver/geonode/', layer: 'geonode:a_distrito', searchField: 'mpio', endPoint: '<c:url value="/amanzanado"/>'});
+            layers.push({label: 'Disperso', url: 'http://sigedv2.ine.gob.bo/geoserver/geonode/', layer: 'geonode:d_areatrabajo', searchField: 'mpio', endPoint: '<c:url value="/disperso"/>'});
 
             // Create Map
             var map = domain.objects.mapa({layers: layers});
@@ -591,15 +589,15 @@
                     if(domain.objects.activeSLayer.label === 'Manzanas') {
                         $.ajax({
                             method: 'POST',
-                            url: Ext.localProxy + 'http://sigedv2.ine.gob.bo:80/geoserver/siged/wfs',
+                            url: Ext.localProxy + 'http://sigedv2.ine.gob.bo:80/geoserver/geonode/wfs',
                             data: {
                                 "service": "WFS",
                                 "request": "GetFeature",
-                                "typename": 'siged:v_perimetros',
+                                "typename": 'geonode:a_distrito',
                                 "outputFormat": "application/json",
                                 "srsname": "EPSG:4326",
                                 "maxFeatures": 50,
-                                "CQL_FILTER": "strToLowerCase(nombreciudad) like '%" + search.toLowerCase() + "%'"
+                                "CQL_FILTER": "strToLowerCase(mpio) like '%" + search.toLowerCase() + "%'"
                             },
                             success: function (response, status, xhr) {
                                 if (xhr.getResponseHeader('Content-Type') === 'application/json') {
@@ -616,11 +614,11 @@
                                         map.zoomToExtent(domain.objects.objectselected.getDataExtent());
                                         if(features.length > 1) {
                                             $('#nFeaturesDialog').modal('toggle');
-                                            var html = '<table class="table table-bordered"><thead><tr><th>Cod. Municipio</th><th>Nombre ciudad</th><th>Opción</th></tr></thead><tbody>';
+                                            var html = '<table class="table table-bordered"><thead><tr><th>Municipio</th><th>Distrito</th><th>Opción</th></tr></thead><tbody>';
                                             domain.objects.objectselected.features.forEach(function (feature, index) {
                                                 // console.log(feature);
-                                                html = html + '<tr><td>' + feature.data.codigomunicipio + '</td>';
-                                                html = html + '<td>' + feature.data.nombreciudad + '</td>';
+                                                html = html + '<tr><td>' + feature.data.mpio + '</td>';
+                                                html = html + '<td>' + feature.data.distrito + '</td>';
                                                 html = html + '<td><button class="btn focusf" value="'+feature.id+'">ver</button></td></tr>';
                                             });    
                                             html = html + '</tbody></table>';
@@ -647,15 +645,15 @@
                     if(domain.objects.activeSLayer.label === 'Disperso') {
                         $.ajax({
                             method: 'POST',
-                            url: Ext.localProxy + 'http://sigedv2.ine.gob.bo:80/geoserver/siged/wfs',
+                            url: Ext.localProxy + 'http://sigedv2.ine.gob.bo:80/geoserver/geonode/wfs',
                             data: {
                                 "service": "WFS",
                                 "request": "GetFeature",
-                                "typename": 'siged:v_fichadisperso',
+                                "typename": 'geonode:d_areatrabajo',
                                 "outputFormat": "application/json",
                                 "srsname": "EPSG:4326",
                                 "maxFeatures": 50,
-                                "CQL_FILTER": "strToLowerCase(nombreciudad) like '%" + search.toLowerCase() + "%'"
+                                "CQL_FILTER": "strToLowerCase(mpio) like '%" + search.toLowerCase() + "%'"
                             },
                             success: function (response, status, xhr) {
                                 if (xhr.getResponseHeader('Content-Type') === 'application/json') {
@@ -672,11 +670,11 @@
                                         map.zoomToExtent(domain.objects.objectselected.getDataExtent());
                                         if(features.length > 1) {
                                             $('#nFeaturesDialog').modal('toggle');
-                                            var html = '<table class="table table-bordered"><thead><tr><th>Municipio</th><th>Nombre ciudad</th><th>Opción</th></tr></thead><tbody>';
+                                            var html = '<table class="table table-bordered"><thead><tr><th>Municipio</th><th>Área de trabajo</th><th>Opción</th></tr></thead><tbody>';
                                             domain.objects.objectselected.features.forEach(function (feature, index) {
                                                 // console.log(feature);
-                                                html = html + '<tr><td>' + feature.data.municipio + '</td>';
-                                                html = html + '<td>' + feature.data.nombreciudad + '</td>';
+                                                html = html + '<tr><td>' + feature.data.mpio + '</td>';
+                                                html = html + '<td>' + feature.data.at + '</td>';
                                                 html = html + '<td><button class="btn focusf" value="'+feature.id+'">ver</button></td></tr>';
                                             });    
                                             html = html + '</tbody></table>';
