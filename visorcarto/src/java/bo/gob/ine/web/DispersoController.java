@@ -689,7 +689,7 @@ public class DispersoController implements Serializable {
             String[] geoms = gson.fromJson(geom, String[].class);
             
             String sql = "select data.id_comunidad, data.depto, data.prov, data.mpio, data.ciu_com, data.localidad, "
-                    + "data.cod_cd_com, data.cod_loc, "
+                    + "data.cod_cd_com, data.cod_loc, data.at, "
                     + "data.cod_ac, data.t_viv_ocu, data.t_viv_des, data.total_viv, data.total_pob, "
                     + "st_astext(data.geom) as geom from \n"
                     + "(select *, st_intersects(st_geomfromtext(:geom, 4326),geom) \n"
@@ -727,7 +727,7 @@ public class DispersoController implements Serializable {
     private OutputStream xReportOutputStream(List<Map<String, Object>> er) {
         try {
             // Open XLSX File template
-            String BLANK_FILE = servletContext.getRealPath("/input") + "/mnz_report.xlsx";
+            String BLANK_FILE = servletContext.getRealPath("/input") + "/com_report.xlsx";
             FileInputStream file = new FileInputStream(BLANK_FILE);
             Workbook workbook = new XSSFWorkbook(file);
             // Select First or Defalut Sheet
@@ -763,16 +763,16 @@ public class DispersoController implements Serializable {
                     w.createCell(11).setCellStyle(newCellStyle);
                 }
                 // values [string data]
-                w.getCell(0).setCellValue(toString(rec.get("depto")));
-                w.getCell(1).setCellValue(toString(rec.get("prov")));
-                w.getCell(2).setCellValue(toString(rec.get("mpio")));
-                w.getCell(3).setCellValue(toString(rec.get("ciu_com")));
-                w.getCell(4).setCellValue(toString(rec.get("id_manz")));                
-                w.getCell(5).setCellValue(toString(rec.get("cod_cd_com")));
-                w.getCell(6).setCellValue(toString(rec.get("cod_loc")));
-                w.getCell(7).setCellValue(toString(rec.get("localidad")));
-                w.getCell(8).setCellValue(toString(rec.get("id_comunidad")));
+                w.getCell(0).setCellValue(toString(rec.get("id_comunidad")));
+                w.getCell(1).setCellValue(toString(rec.get("depto")));
+                w.getCell(2).setCellValue(toString(rec.get("prov")));
+                w.getCell(3).setCellValue(toString(rec.get("mpio")));
+                w.getCell(4).setCellValue(toString(rec.get("ciu_com")));                
+                w.getCell(5).setCellValue(toString(rec.get("localidad")));
+                w.getCell(6).setCellValue(toString(rec.get("at")));
+                w.getCell(7).setCellValue(toString(rec.get("cod_ac")));
                 // Double or number data sample
+                setNumber(w.getCell(8), rec.get("t_viv_ocu"));
                 setNumber(w.getCell(9), rec.get("t_viv_des"));
                 setNumber(w.getCell(10), rec.get("total_viv"));
                 setNumber(w.getCell(11), rec.get("total_pob"));

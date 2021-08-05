@@ -766,16 +766,17 @@ public class AmanzanadoController implements Serializable {
                     w.createCell(11).setCellStyle(newCellStyle);
                 }
                 // values [string data]
-                w.getCell(0).setCellValue(toString(rec.get("depto")));
-                w.getCell(1).setCellValue(toString(rec.get("prov")));
-                w.getCell(2).setCellValue(toString(rec.get("mpio")));
+                w.getCell(0).setCellValue(toString(rec.get("id_manz"))); 
+                w.getCell(1).setCellValue(toString(rec.get("depto")));
+                w.getCell(2).setCellValue(toString(rec.get("prov")));
+                w.getCell(3).setCellValue(toString(rec.get("mpio")));
                 w.getCell(3).setCellValue(toString(rec.get("ciu_com")));
-                w.getCell(4).setCellValue(toString(rec.get("id_manz")));                
-                w.getCell(5).setCellValue(toString(rec.get("cod_cd_com")));
-                w.getCell(6).setCellValue(toString(rec.get("cod_loc")));
-                w.getCell(7).setCellValue(toString(rec.get("distrito")));
-                w.getCell(8).setCellValue(toString(rec.get("orden_manz")));
+                               
+                w.getCell(5).setCellValue(toString(rec.get("distrito")));
+                w.getCell(6).setCellValue(toString(rec.get("orden_manz")));
+                w.getCell(7).setCellValue(toString(rec.get("cod_ac")));                
                 // Double or number data sample
+                setNumber(w.getCell(8), rec.get("t_viv_ocu"));
                 setNumber(w.getCell(9), rec.get("t_viv_des"));
                 setNumber(w.getCell(10), rec.get("total_viv"));
                 setNumber(w.getCell(11), rec.get("total_pob"));
