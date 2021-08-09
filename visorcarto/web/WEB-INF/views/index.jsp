@@ -290,6 +290,22 @@
                     {type: google.maps.MapTypeId.HYBRID, numZoomLevels: 20}
             );
             map.addLayer(ghyb);
+            
+            // límites
+            var lims = new OpenLayers.Layer.WMS('Municipios', 'http://sigedv2.ine.gob.bo/geoserver/geonode/wms', {
+                layers: 'geonode:municipios_trans',
+                transparent: true,
+                format: 'image/png'
+            }, {
+                buffer: 0,
+                displayOutsideMaxExtent: true,
+                isBaseLayer: false,
+                visibility: true,
+                singleTile: true,
+                displayInLayerSwitcher: false,
+                yx: {'EPSG:4326': true}
+            });
+            map.addLayer(lims);
 
             // Data Layers
             options.layers.forEach(function (item, index) {
@@ -429,6 +445,99 @@
                         //styleMap: domain.objects.styles
             });
             map.addLayer(this.objectselected);
+            
+            // Object selected focus            
+            var fstyle = new OpenLayers.StyleMap({
+                "default": new OpenLayers.Style(null, {
+                    rules: [
+                        new OpenLayers.Rule({
+                            symbolizer: {
+                                "Point": {
+                                    pointRadius: 7,
+                                    fillColor: "#ffffff",
+                                    fillOpacity: 0.25,
+                                    strokeWidth: 2,
+                                    strokeOpacity: 1,
+                                    strokeColor: "#00ff00"
+                                },
+                                "Line": {
+                                    strokeWidth: 3,
+                                    strokeOpacity: 0.7,
+                                    strokeColor: "#00ff00"
+                                },
+                                "Polygon": {
+                                    strokeWidth: 2,
+                                    strokeOpacity: 1,
+                                    fillOpacity: 0.1,
+                                    fillColor: "#ff0000",
+                                    strokeColor: "#ff0000"
+                                }
+                            }
+                        })
+                    ]
+                }),
+                "select": new OpenLayers.Style(null, {
+                    rules: [
+                        new OpenLayers.Rule({
+                            symbolizer: {
+                                "Point": {
+                                    pointRadius: 5,
+                                    graphicName: "square",
+                                    fillColor: "red",
+                                    fillOpacity: 0.25,
+                                    strokeWidth: 2,
+                                    strokeOpacity: 1,
+                                    strokeColor: "#0000ff"
+                                },
+                                "Line": {
+                                    strokeWidth: 3,
+                                    strokeOpacity: 1,
+                                    strokeColor: "#0000ff"
+                                },
+                                "Polygon": {
+                                    strokeWidth: 2,
+                                    strokeOpacity: 1,
+                                    fillColor: "#0000ff",
+                                    strokeColor: "#0000ff"
+                                }
+                            }
+                        })
+                    ]
+                }),
+                "temporary": new OpenLayers.Style(null, {
+                    rules: [
+                        new OpenLayers.Rule({
+                            symbolizer: {
+                                "Point": {
+                                    //graphicName: "square",
+                                    pointRadius: 5,
+                                    fillColor: "#ff0000",
+                                    fillOpacity: 0.25,
+                                    strokeWidth: 2,
+                                    strokeColor: "#ff0000"
+                                },
+                                "Line": {
+                                    strokeWidth: 3,
+                                    strokeOpacity: 1,
+                                    strokeColor: "#ff0000"
+                                },
+                                "Polygon": {
+                                    strokeWidth: 2,
+                                    strokeOpacity: 1,
+                                    strokeColor: "#ff0000",
+                                    fillColor: "#ff0000"
+                                }
+                            }
+                        })
+                    ]
+                })
+            });
+            
+            this.objectfocus = new OpenLayers.Layer.Vector("objectfocus", {
+                displayInLayerSwitcher: false,
+                styleMap: fstyle
+            });
+            map.addLayer(this.objectfocus);
 
             // this.control = control;
             map.events.register("changebaselayer", this, function (obj) {
@@ -446,7 +555,9 @@
         domain.objects.focus = function (fid) {
             console.log(fid);
             var f = domain.objects.objectselected.getFeatureById(fid);
-            console.log(f)
+            console.log(f);
+            domain.objects.objectfocus.removeAllFeatures();
+            domain.objects.objectfocus.addFeatures([f]);
             domain.objects.searchSelect = f;
             domain.objects.imap.zoomToExtent(f.geometry.getBounds());
         };
@@ -684,6 +795,8 @@
                                                 domain.objects.focus($(this).val());
                                                 $('#nFeaturesDialog').modal('toggle');
                                             });
+                                        } else {
+                                            domain.objects.focus(features[0].id);
                                         }
                                     } else {
                                         $('#notFoundDialog').modal('toggle');                                    
