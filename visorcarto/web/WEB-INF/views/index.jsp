@@ -185,14 +185,14 @@
         // Glove Info
         domain.objects.popup = function (feature, map) {
             var predioDetails = '<div class="card-content">';
-            predioDetails += '<strong>depto_estadistico: ' + feature.data.departamento + '</strong><br>';
-            predioDetails += '<strong>prov_estadistico: ' + feature.data.provincia + '</strong><br>';
-            predioDetails += '<strong>mun_estadistico: ' + feature.data.municipio + '</strong><br>';
-            predioDetails += '<strong>nombreciudad: ' + feature.data.nombreciudad + '</strong><br>';
-            predioDetails += '<strong>pob_empadronada: ' + feature.data.pob_edad_tot + '</strong><br>';
-            predioDetails += '<strong>viviendas: ' + feature.data.viv_vivpart + '</strong><br>';
-            predioDetails += '<strong>pob_60años_mas: ' + feature.data.pob_edad_60mas + '</strong><br>';
-            predioDetails += '<strong>cod_ine: ' + feature.data.idmanzana + '</strong><br>';
+            predioDetails += '<strong>Departamento: ' + feature.data.depto + '</strong><br>';
+            predioDetails += '<strong>Provincia: ' + feature.data.prov + '</strong><br>';
+            predioDetails += '<strong>Municipio: ' + feature.data.mpio + '</strong><br>';
+            predioDetails += '<strong>Nombre Ciudad: ' + feature.data.ciu_com + '</strong><br>';
+            predioDetails += '<strong>Viv. Ocupadas: ' + feature.data.t_viv_ocu + '</strong><br>';
+            predioDetails += '<strong>Viv. Desocupadas: ' + feature.data.t_viv_des + '</strong><br>';
+            predioDetails += '<strong>Total Vivientas: ' + feature.data.total_viv + '</strong><br>';
+            predioDetails += '<strong>Total Población: ' + feature.data.total_pob + '</strong><br>';
 
             predioDetails += '</div>';
             // info popup
@@ -641,8 +641,8 @@
         $(document).ready(function () {
             // N-Layers Array
             var layers = new Array();
-            layers.push({label: 'Manzanas', url: 'http://sigedv2.ine.gob.bo/geoserver/geonode/', layer: 'geonode:a_distrito', searchField: 'mpio', endPoint: '<c:url value="/amanzanado"/>'});
-            layers.push({label: 'Disperso', url: 'http://sigedv2.ine.gob.bo/geoserver/geonode/', layer: 'geonode:d_areatrabajo', searchField: 'mpio', endPoint: '<c:url value="/disperso"/>'});
+            layers.push({label: 'Manzanas', url: 'http://sigedv2.ine.gob.bo/geoserver/geonode/', layer: 'geonode:bolivia_manzano_poligono', searchField: 'idmanz', endPoint: '<c:url value="/amanzanado"/>'});
+            layers.push({label: 'Disperso', url: 'http://sigedv2.ine.gob.bo/geoserver/geonode/', layer: 'geonode:bolivia_com_loc', searchField: 'id_comunidad', endPoint: '<c:url value="/disperso"/>'});
 
             // Create Map
             var map = domain.objects.mapa({layers: layers});
@@ -726,10 +726,11 @@
                                         map.zoomToExtent(domain.objects.objectselected.getDataExtent());
                                         if(features.length > 1) {
                                             $('#nFeaturesDialog').modal('toggle');
-                                            var html = '<table class="table table-bordered"><thead><tr><th>Municipio</th><th>Distrito</th><th>Opción</th></tr></thead><tbody>';
+                                            var html = '<table class="table table-bordered"><thead><tr><th>Departamento</th><th>Municipio</th><th>Distrito</th><th>Opción</th></tr></thead><tbody>';
                                             domain.objects.objectselected.features.forEach(function (feature, index) {
                                                 // console.log(feature);
-                                                html = html + '<tr><td>' + feature.data.mpio + '</td>';
+                                                html = html + '<tr><td>' + feature.data.depto + '</td>';
+                                                html = html + '<td>' + feature.data.mpio + '</td>';
                                                 html = html + '<td>' + feature.data.distrito + '</td>';
                                                 html = html + '<td><button class="btn focusf" value="'+feature.id+'">ver</button></td></tr>';
                                             });    
@@ -782,10 +783,11 @@
                                         map.zoomToExtent(domain.objects.objectselected.getDataExtent());
                                         if(features.length > 1) {
                                             $('#nFeaturesDialog').modal('toggle');
-                                            var html = '<table class="table table-bordered"><thead><tr><th>Municipio</th><th>Área de trabajo</th><th>Opción</th></tr></thead><tbody>';
+                                            var html = '<table class="table table-bordered"><thead><tr><th>Departamento</th><th>Municipio</th><th>Área de trabajo</th><th>Opción</th></tr></thead><tbody>';
                                             domain.objects.objectselected.features.forEach(function (feature, index) {
                                                 // console.log(feature);
-                                                html = html + '<tr><td>' + feature.data.mpio + '</td>';
+                                                html = html + '<tr><td>' + feature.data.depto + '</td>';
+                                                html = html + '<td>' + feature.data.mpio + '</td>';
                                                 html = html + '<td>' + feature.data.at + '</td>';
                                                 html = html + '<td><button class="btn focusf" value="'+feature.id+'">ver</button></td></tr>';
                                             });    
