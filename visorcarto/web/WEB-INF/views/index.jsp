@@ -441,7 +441,8 @@
 
             // Object selected layer
             this.objectselected = new OpenLayers.Layer.Vector("objectselected", {
-                displayInLayerSwitcher: false
+                displayInLayerSwitcher: false,
+                visibility: false
                         //styleMap: domain.objects.styles
             });
             map.addLayer(this.objectselected);
@@ -468,9 +469,10 @@
                                 "Polygon": {
                                     strokeWidth: 2,
                                     strokeOpacity: 1,
-                                    fillOpacity: 0.1,
+                                    fillOpacity: 0.2,
                                     fillColor: "#ff0000",
-                                    strokeColor: "#ff0000"
+                                    strokeColor: "#ff0000",
+                                    label:'\${label}'
                                 }
                             }
                         })
@@ -721,6 +723,7 @@
                                         //domain.objects.popup(feature, map);
                                         domain.objects.objectselected.removeAllFeatures();
                                         features.forEach(function (feature, index) {
+                                            feature.attributes.label = feature.attributes.distrito;
                                             domain.objects.selectFeature(map, feature, false);                                       
                                         });
                                         map.zoomToExtent(domain.objects.objectselected.getDataExtent());
@@ -778,6 +781,7 @@
                                         //domain.objects.popup(feature, map);
                                         domain.objects.objectselected.removeAllFeatures();
                                         features.forEach(function (feature, index) {
+                                            feature.attributes.label = feature.attributes.at;
                                             domain.objects.selectFeature(map, feature, false);                                       
                                         });
                                         map.zoomToExtent(domain.objects.objectselected.getDataExtent());
