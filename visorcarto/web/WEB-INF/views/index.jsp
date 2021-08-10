@@ -604,7 +604,7 @@
                         item.geometry.transform(
                             new OpenLayers.Projection("EPSG:900913"),
                             new OpenLayers.Projection("EPSG:4326")
-                            );     
+                            );
                         arr.push(item.geometry.toString());    
                     });
 
@@ -822,6 +822,7 @@
             
             // search select
             $('#_select_search').on('click', function () {
+                console.log(domain.objects.searchSelect)
                 if(domain.objects.searchSelect !== null) {
                     //domain.objects.drawn = true;
                     //domain.objects.canvas.addFeatures([domain.objects.searchSelect]);
@@ -834,7 +835,11 @@
 
             // reset all
             $('#_clear_all').on('click', function () {
+                domain.objects.objectselected.removeAllFeatures();
+                domain.objects.searchSelect = null;
+                //
                 domain.objects.canvas.removeAllFeatures();
+                domain.objects.objectfocus.removeAllFeatures();
                 domain.objects.switchControl('clear');
                 domain.objects.dynamicMeasure.emptyKeeped();
             });
@@ -851,8 +856,10 @@
             });
             $('#_unselect').on('click', function () {
                 domain.objects.objectselected.removeAllFeatures();
+                domain.objects.searchSelect = null;
                 //
                 domain.objects.canvas.removeAllFeatures();
+                domain.objects.objectfocus.removeAllFeatures();                
                 domain.objects.switchControl('clear');
                 domain.objects.dynamicMeasure.emptyKeeped();
             });
