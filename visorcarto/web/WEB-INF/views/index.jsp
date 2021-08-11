@@ -336,91 +336,7 @@
             });
             this.canvas.events.on({
                 featureadded: function (e) {
-                    /*var feature = e.feature;
-                    feature.geometry.transform(
-                            new OpenLayers.Projection("EPSG:900913"),
-                            new OpenLayers.Projection("EPSG:4326")
-                            );
-                    $.ajax({
-                        url: domain.objects.activeSLayer.endPoint + '/ficha/selected',
-                        type: "POST",
-                        data: {geom: feature.geometry.toString(), drawn: domain.objects.drawn},
-                        success: function (data) {
-                            domain.objects.drawn = false;
-                            if (data.success) {
-                                // console.log(data.data);
-                                var ids = new Array();
-                                data.data.forEach(function (item, index) {
-                                    var f = domain.objects.featureFromText(item.geom);
-                                    domain.objects.selectFeature(map, f, false);
-                                    ids.push(item[domain.objects.activeSLayer.searchField]);
-                                });
-
-                                $('#moreinfo').modal('toggle');
-                                $.ajax({
-                                    url: domain.objects.activeSLayer.endPoint + '/ficha/data',
-                                    type: "POST",
-                                    data: {ids: JSON.stringify(ids)},
-                                    dataType: 'json',
-                                    success: function (data) {
-
-                                        var datas = data.data;
-                                        var serie_data = [
-                                            datas.pob_edad_0003,
-                                            datas.pob_edad_0405,
-                                            datas.pob_edad_0619,
-                                            datas.pob_edad_2039,
-                                            datas.pob_edad_4059,
-                                            datas.pob_edad_60mas
-                                        ];
-
-                                        var time = new Date().getTime();
-                                        $("#docContent").html('<embed src="'+ domain.objects.activeSLayer.endPoint +'/ficha/pdf?time=' + time + '" width="100%" height="200"><br/><a class="btn btn-primary btn-sm" href="'+ domain.objects.activeSLayer.endPoint + '/ficha/pdf?download=true">PDF</a>&nbsp;<a class="btn btn-success btn-sm" href="'+ domain.objects.activeSLayer.endPoint + '/ficha/xlsx">XLSX</a>');
-                                        Highcharts.chart('container', {
-                                            chart: {
-                                                type: 'column',
-                                                options3d: {
-                                                    enabled: true,
-                                                    alpha: 10,
-                                                    beta: 25,
-                                                    depth: 70
-                                                }
-                                            },
-                                            title: {
-                                                text: 'Resumen'
-                                            },
-                                            subtitle: {
-                                                text: 'POBLACIÓN EMPADRONADA POR SEXO, SEGÚN GRUPO DE EDAD'
-                                            },
-                                            plotOptions: {
-                                                column: {
-                                                    depth: 25
-                                                }
-                                            },
-                                            xAxis: {
-                                                categories: ["0-3", "4-5", "6-19", "20-39", "40-59", "60 y más"],
-                                                labels: {
-                                                    skew3d: true,
-                                                    style: {
-                                                        fontSize: '16px'
-                                                    }
-                                                }
-                                            },
-                                            yAxis: {
-                                                title: {
-                                                    text: null
-                                                }
-                                            },
-                                            series: [{
-                                                    name: 'Edad',
-                                                    data: serie_data
-                                                }]
-                                        });
-                                    }
-                                });
-                            }
-                        }
-                    });*/
+                    /* */
                 }
             });
             // Draw control
@@ -442,8 +358,7 @@
             // Object selected layer
             this.objectselected = new OpenLayers.Layer.Vector("objectselected", {
                 displayInLayerSwitcher: false,
-                visibility: false
-                        //styleMap: domain.objects.styles
+                styleMap: domain.objects.styles
             });
             map.addLayer(this.objectselected);
             
@@ -822,12 +737,8 @@
             
             // search select
             $('#_select_search').on('click', function () {
-                console.log(domain.objects.searchSelect)
                 if(domain.objects.searchSelect !== null) {
-                    //domain.objects.drawn = true;
-                    //domain.objects.canvas.addFeatures([domain.objects.searchSelect]);
                     domain.objects.getData(domain.objects.searchSelect);
-                    //domain.objects.searchSelect = null;
                 } else {
                     domain.objects.getDatas(domain.objects.canvas.features);
                 }    
