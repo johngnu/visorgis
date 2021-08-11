@@ -57,9 +57,10 @@ domain.objects = {
                         "Polygon": {
                             strokeWidth: 2,
                             strokeOpacity: 1,
-                            fillOpacity: 0.25,
-                            fillColor: "#ffffff",
-                            strokeColor: "#ababab"
+                            fillOpacity: 0.5,
+                            fillColor: "#cccccc",
+                            strokeColor: "#cccccc",
+                            label: '\${label}'
                         }
                     }
                 })
