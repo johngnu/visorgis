@@ -72,9 +72,6 @@
                     Opciones <span class="caret"></span></button>
                 <ul class="dropdown-menu" role="menu">
                     <li><a href="#" id="_draw_select">Seleccionar</a></li>
-                    <!--<li role="separator" class="divider"></li>
-                    <li><a href="#" id="_draw_polygon">Polígono</a></li>
-                    <li><a href="#" id="_draw_point">Punto</a></li>-->
                     <li role="separator" class="divider"></li>
                     <li><a href="#" id="_select_search">Enviar seleccionado</a></li>
                     <li role="separator" class="divider"></li>
@@ -142,7 +139,7 @@
                 </div>
             </div>
         </div> 
-        
+
         <div class="modal fade" id="nFeaturesDialog" tabindex="-1" role="dialog" aria-labelledby="nFeaturesDialog" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -188,11 +185,11 @@
             predioDetails += '<strong>Departamento: ' + feature.data.depto + '</strong><br>';
             predioDetails += '<strong>Provincia: ' + feature.data.prov + '</strong><br>';
             predioDetails += '<strong>Municipio: ' + feature.data.mpio + '</strong><br>';
-            predioDetails += '<strong>Nombre Ciudad: ' + feature.data.ciu_com + '</strong><br>';
-            predioDetails += '<strong>Viv. Ocupadas: ' + feature.data.t_viv_ocu + '</strong><br>';
-            predioDetails += '<strong>Viv. Desocupadas: ' + feature.data.t_viv_des + '</strong><br>';
-            predioDetails += '<strong>Total Vivientas: ' + feature.data.total_viv + '</strong><br>';
-            predioDetails += '<strong>Total Población: ' + feature.data.total_pob + '</strong><br>';
+            predioDetails += '<strong>Nombre Ciudad: ' + (feature.data.ciu_com ? feature.data.ciu_com : '') + '</strong><br>';
+            predioDetails += '<strong>Viv. Ocupadas: ' + (feature.data.t_viv_ocu ? feature.data.t_viv_ocu : '') + '</strong><br>';
+            predioDetails += '<strong>Viv. Desocupadas: ' + (feature.data.t_viv_des ? feature.data.t_viv_des : '') + '</strong><br>';
+            predioDetails += '<strong>Total Vivientas: ' + (feature.data.total_viv ? feature.data.total_viv : '') + '</strong><br>';
+            predioDetails += '<strong>Total Población: ' + (feature.data.total_pob ? feature.data.total_pob : '') + '</strong><br>';
 
             predioDetails += '</div>';
             // info popup
@@ -290,7 +287,7 @@
                     {type: google.maps.MapTypeId.HYBRID, numZoomLevels: 20}
             );
             map.addLayer(ghyb);
-            
+
             // límites
             var lims = new OpenLayers.Layer.WMS('Municipios', 'http://sigedv2.ine.gob.bo/geoserver/geonode/wms', {
                 layers: 'geonode:municipios_trans',
@@ -361,7 +358,13 @@
                 styleMap: domain.objects.styles
             });
             map.addLayer(this.objectselected);
-            
+
+            // Data selected layer
+            this.dataselected = new OpenLayers.Layer.Vector("dataselected", {
+                displayInLayerSwitcher: false
+            });
+            map.addLayer(this.dataselected);
+
             // Object selected focus            
             var fstyle = new OpenLayers.StyleMap({
                 "default": new OpenLayers.Style(null, {
@@ -387,7 +390,7 @@
                                     fillOpacity: 0.2,
                                     fillColor: "#ff0000",
                                     strokeColor: "#ff0000",
-                                    label:'\${label}'
+                                    label: '\${label}'
                                 }
                             }
                         })
@@ -449,7 +452,7 @@
                     ]
                 })
             });
-            
+
             this.objectfocus = new OpenLayers.Layer.Vector("objectfocus", {
                 displayInLayerSwitcher: false,
                 styleMap: fstyle
@@ -478,81 +481,86 @@
             domain.objects.searchSelect = f;
             domain.objects.imap.zoomToExtent(f.geometry.getBounds());
         };
-        domain.objects.getData = function(feature) {
-                    feature.geometry.transform(
-                            new OpenLayers.Projection("EPSG:900913"),
-                            new OpenLayers.Projection("EPSG:4326")
-                            );
-                    $.ajax({
-                        url: domain.objects.activeSLayer.endPoint + '/getdata',
-                        type: "POST",
-                        data: {geom: JSON.stringify([feature.geometry.toString()])},
-                        success: function (data) {
-                            domain.objects.drawn = false;
-                            if (data.success) {
-                                // console.log(data.data);
-                                var ids = new Array();
-                                var fets = new Array();
-                                var geographic = new OpenLayers.Projection("EPSG:4326");
-                                var mercator = new OpenLayers.Projection("EPSG:900913");
-        
-                                data.data.forEach(function (item, index) {
-                                    var f = domain.objects.featureFromText(item.geom);
-                                    //domain.objects.selectFeature(map, f, false);
-                                    f.geometry.transform(geographic, mercator);
-                                    fets.push(f);
-                                    ids.push(item[domain.objects.activeSLayer.searchField]);
-                                });
-                                domain.objects.objectselected.addFeatures(fets);
+        domain.objects.getData = function (feature) {
+            domain.objects.dataselected.removeAllFeatures();
+            feature.geometry.transform(
+                    new OpenLayers.Projection("EPSG:900913"),
+                    new OpenLayers.Projection("EPSG:4326")
+                    );
+            $.ajax({
+                url: domain.objects.activeSLayer.endPoint + '/getdata',
+                type: "POST",
+                data: {geom: JSON.stringify([feature.geometry.toString()])},
+                success: function (data) {
+                    domain.objects.drawn = false;
+                    if (data.success) {
+                        // console.log(data.data);
+                        var ids = new Array();
+                        var fets = new Array();
+                        var geographic = new OpenLayers.Projection("EPSG:4326");
+                        var mercator = new OpenLayers.Projection("EPSG:900913");
 
-                                $('#moreinfo').modal('toggle');
-                                var time = new Date().getTime();
-                                $("#docContent").html('<a class="btn btn-success btn-block" href="'+ domain.objects.activeSLayer.endPoint + '/ficha/xlsx">Descargar</a>');                                
-                            }
-                            //domain.objects.searchSelect = null;
-                        }
-                    });
+                        data.data.forEach(function (item, index) {
+                            var f = domain.objects.featureFromText(item.geom);
+                            //domain.objects.selectFeature(map, f, false);                                    
+                            f.geometry.transform(geographic, mercator);
+                            //f.attributes.label = ''; //(item.distrito ? item.distrito : '')
+                            fets.push(f);
+                            ids.push(item[domain.objects.activeSLayer.searchField]);
+                        });
+                        domain.objects.dataselected.addFeatures(fets);
+
+                        $('#moreinfo').modal('toggle');
+                        var time = new Date().getTime();
+                        $("#docContent").html('<a class="btn btn-success btn-block" href="' + domain.objects.activeSLayer.endPoint + '/ficha/xlsx">Descargar</a>');
+                    }
+                    //domain.objects.searchSelect = null;
+                }
+            });
         };
-        domain.objects.getDatas = function(features) {
-                    var arr = new Array();
-                    features.forEach(function (item, index) {
-                        item.geometry.transform(
-                            new OpenLayers.Projection("EPSG:900913"),
-                            new OpenLayers.Projection("EPSG:4326")
-                            );
-                        arr.push(item.geometry.toString());    
-                    });
+        domain.objects.getDatas = function (features) {
+            if(features.length > 0) {
+            domain.objects.dataselected.removeAllFeatures();
+            var arr = new Array();
+            features.forEach(function (item, index) {
+                item.geometry.transform(
+                        new OpenLayers.Projection("EPSG:900913"),
+                        new OpenLayers.Projection("EPSG:4326")
+                        );
+                arr.push(item.geometry.toString());
+            });
 
-                    $.ajax({
-                        url: domain.objects.activeSLayer.endPoint + '/getdata',
-                        type: "POST",
-                        //contentType: 'application/json',
-                        //data: {geom: feature.geometry.toString()},
-                        data: {geom: JSON.stringify(arr)}, //stringify is important
-                        success: function (data) {
-                            domain.objects.drawn = false;
-                            if (data.success) {
-                                // console.log(data.data);
-                                var ids = new Array();
-                                var fets = new Array();
-                                var geographic = new OpenLayers.Projection("EPSG:4326");
-                                var mercator = new OpenLayers.Projection("EPSG:900913");
-        
-                                data.data.forEach(function (item, index) {
-                                    var f = domain.objects.featureFromText(item.geom);
-                                    //domain.objects.selectFeature(map, f, false);
-                                    f.geometry.transform(geographic, mercator);
-                                    fets.push(f);
-                                    ids.push(item[domain.objects.activeSLayer.searchField]);
-                                });
-                                domain.objects.objectselected.addFeatures(fets);
+            $.ajax({
+                url: domain.objects.activeSLayer.endPoint + '/getdata',
+                type: "POST",
+                //contentType: 'application/json',
+                //data: {geom: feature.geometry.toString()},
+                data: {geom: JSON.stringify(arr)}, //stringify is important
+                success: function (data) {
+                    domain.objects.drawn = false;
+                    if (data.success) {
+                        // console.log(data.data);
+                        var ids = new Array();
+                        var fets = new Array();
+                        var geographic = new OpenLayers.Projection("EPSG:4326");
+                        var mercator = new OpenLayers.Projection("EPSG:900913");
 
-                                $('#moreinfo').modal('toggle');
-                                var time = new Date().getTime();
-                                $("#docContent").html('<a class="btn btn-success btn-block" href="'+ domain.objects.activeSLayer.endPoint + '/ficha/xlsx">Descargar</a>');                                
-                            }
-                        }
-                    });
+                        data.data.forEach(function (item, index) {
+                            var f = domain.objects.featureFromText(item.geom);
+                            //domain.objects.selectFeature(map, f, false);
+                            f.geometry.transform(geographic, mercator);
+                            fets.push(f);
+                            ids.push(item[domain.objects.activeSLayer.searchField]);
+                        });
+                        domain.objects.dataselected.addFeatures(fets);
+
+                        $('#moreinfo').modal('toggle');
+                        var time = new Date().getTime();
+                        $("#docContent").html('<a class="btn btn-success btn-block" href="' + domain.objects.activeSLayer.endPoint + '/ficha/xlsx">Descargar</a>');
+                    }
+                }
+            });
+            }
         };
 
         $(document).ready(function () {
@@ -615,7 +623,7 @@
                 $('#search-form').submit(function () {
                     var search = $(this).find('input[name="txtSearch"]').val();
                     //console.log(domain.objects.activeSLayer);
-                    if(domain.objects.activeSLayer.label === 'Manzanas') {
+                    if (domain.objects.activeSLayer.label === 'Manzanas') {
                         $.ajax({
                             method: 'POST',
                             url: Ext.localProxy + 'http://sigedv2.ine.gob.bo:80/geoserver/geonode/wfs',
@@ -639,10 +647,10 @@
                                         domain.objects.objectselected.removeAllFeatures();
                                         features.forEach(function (feature, index) {
                                             feature.attributes.label = feature.attributes.distrito;
-                                            domain.objects.selectFeature(map, feature, false);                                       
+                                            domain.objects.selectFeature(map, feature, false);
                                         });
                                         map.zoomToExtent(domain.objects.objectselected.getDataExtent());
-                                        if(features.length > 1) {
+                                        if (features.length > 1) {
                                             $('#nFeaturesDialog').modal('toggle');
                                             var html = '<table class="table table-bordered"><thead><tr><th>Departamento</th><th>Municipio</th><th>Distrito</th><th>Opción</th></tr></thead><tbody>';
                                             domain.objects.objectselected.features.forEach(function (feature, index) {
@@ -650,19 +658,20 @@
                                                 html = html + '<tr><td>' + feature.data.depto + '</td>';
                                                 html = html + '<td>' + feature.data.mpio + '</td>';
                                                 html = html + '<td>' + feature.data.distrito + '</td>';
-                                                html = html + '<td><button class="btn focusf" value="'+feature.id+'">ver</button></td></tr>';
-                                            });    
+                                                html = html + '<td><button class="btn focusf" value="' + feature.id + '">ver</button></td></tr>';
+                                            });
                                             html = html + '</tbody></table>';
                                             $('#_nresults_').html(html);
-                                            $('.focusf').on('click', function () {                                            
+                                            $('.focusf').on('click', function () {
+                                                domain.objects.dataselected.removeAllFeatures();
                                                 domain.objects.focus($(this).val());
                                                 $('#nFeaturesDialog').modal('toggle');
                                             });
                                         } else {
                                             domain.objects.focus(features[0].id);
-                                        }    
+                                        }
                                     } else {
-                                        $('#notFoundDialog').modal('toggle');                                    
+                                        $('#notFoundDialog').modal('toggle');
                                     }
                                 } else {
                                     $('#notFoundDialog').modal('toggle');
@@ -673,7 +682,7 @@
                             }
                         });
                     }
-                    if(domain.objects.activeSLayer.label === 'Disperso') {
+                    if (domain.objects.activeSLayer.label === 'Disperso') {
                         $.ajax({
                             method: 'POST',
                             url: Ext.localProxy + 'http://sigedv2.ine.gob.bo:80/geoserver/geonode/wfs',
@@ -697,10 +706,10 @@
                                         domain.objects.objectselected.removeAllFeatures();
                                         features.forEach(function (feature, index) {
                                             feature.attributes.label = feature.attributes.at;
-                                            domain.objects.selectFeature(map, feature, false);                                       
+                                            domain.objects.selectFeature(map, feature, false);
                                         });
                                         map.zoomToExtent(domain.objects.objectselected.getDataExtent());
-                                        if(features.length > 1) {
+                                        if (features.length > 1) {
                                             $('#nFeaturesDialog').modal('toggle');
                                             var html = '<table class="table table-bordered"><thead><tr><th>Departamento</th><th>Municipio</th><th>Área de trabajo</th><th>Opción</th></tr></thead><tbody>';
                                             domain.objects.objectselected.features.forEach(function (feature, index) {
@@ -708,11 +717,11 @@
                                                 html = html + '<tr><td>' + feature.data.depto + '</td>';
                                                 html = html + '<td>' + feature.data.mpio + '</td>';
                                                 html = html + '<td>' + feature.data.at + '</td>';
-                                                html = html + '<td><button class="btn focusf" value="'+feature.id+'">ver</button></td></tr>';
-                                            });    
+                                                html = html + '<td><button class="btn focusf" value="' + feature.id + '">ver</button></td></tr>';
+                                            });
                                             html = html + '</tbody></table>';
                                             $('#_nresults_').html(html);
-                                            $('.focusf').on('click', function () {                                            
+                                            $('.focusf').on('click', function () {
                                                 domain.objects.focus($(this).val());
                                                 $('#nFeaturesDialog').modal('toggle');
                                             });
@@ -720,7 +729,7 @@
                                             domain.objects.focus(features[0].id);
                                         }
                                     } else {
-                                        $('#notFoundDialog').modal('toggle');                                    
+                                        $('#notFoundDialog').modal('toggle');
                                     }
                                 } else {
                                     $('#notFoundDialog').modal('toggle');
@@ -730,22 +739,23 @@
                                 console.log("Request failed: " + textStatus);
                             }
                         });
-                    }    
+                    }
                     return false;
                 });
             }
-            
+
             // search select
             $('#_select_search').on('click', function () {
-                if(domain.objects.searchSelect !== null) {
+                if (domain.objects.searchSelect !== null) {
                     domain.objects.getData(domain.objects.searchSelect);
                 } else {
                     domain.objects.getDatas(domain.objects.canvas.features);
-                }    
+                }
             });
 
             // reset all
             $('#_clear_all').on('click', function () {
+                domain.objects.dataselected.removeAllFeatures();
                 domain.objects.objectselected.removeAllFeatures();
                 domain.objects.searchSelect = null;
                 //
@@ -766,18 +776,19 @@
                 domain.objects.switchControl('line');
             });
             $('#_unselect').on('click', function () {
+                domain.objects.dataselected.removeAllFeatures();
                 domain.objects.objectselected.removeAllFeatures();
                 domain.objects.searchSelect = null;
                 //
                 domain.objects.canvas.removeAllFeatures();
-                domain.objects.objectfocus.removeAllFeatures();                
+                domain.objects.objectfocus.removeAllFeatures();
                 domain.objects.switchControl('clear');
                 domain.objects.dynamicMeasure.emptyKeeped();
             });
             $('#_draw_select').click(function () {
                 domain.objects.switchControl('select');
             });
-            
+
         });
     </script>
 </html>
