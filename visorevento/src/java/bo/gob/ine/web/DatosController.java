@@ -85,4 +85,26 @@ public class DatosController {
         }
         return data;
     }
+    
+    @RequestMapping(value = "/riego", method = RequestMethod.GET)
+    @ResponseBody
+    public Map<String, Object> riego() {
+        logger.info("GET selected data by params");
+        Map<String, Object> data = new HashMap<>();
+        try {
+            String sql = "select proyecto, programa, nom_prog, depto, municipio, inver, lon, lat, st_astext(ST_GeometryN(geom, 1)) as geom \n"                    
+                    + "from agro.t_riego ";
+                    
+            // execute
+            List<Map<String, Object>> res = dao.selectSQLMapResult(sql);
+
+            data.put("data", res);
+            data.put("success", Boolean.TRUE);
+        } catch (Exception e) {
+            logger.error("Error al obtener ejecutar SQL: " + e.getMessage());
+            data.put("success", Boolean.FALSE);
+            data.put("errorMessage", e.getMessage());
+        }
+        return data;
+    }
 }
