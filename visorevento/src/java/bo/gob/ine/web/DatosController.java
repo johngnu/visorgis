@@ -92,7 +92,7 @@ public class DatosController {
         logger.info("GET selected data by params");
         Map<String, Object> data = new HashMap<>();
         try {
-            String sql = "select proyecto, programa, nom_prog, depto, municipio, inver, lon, lat, st_astext(ST_GeometryN(geom, 1)) as geom \n"                    
+            String sql = "select proyecto, programa, nom_prog, depto, municipio, inver, lon, lat, st_astext(geom) as geom \n"                    
                     + "from agro.t_riego ";
                     
             // execute
