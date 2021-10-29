@@ -711,7 +711,7 @@ public class AmanzanadoController implements Serializable {
 
             String sql = "select data.id_manz, data.depto, data.prov, data.mpio, data.ciu_com, data.distrito, "
                     + "data.cod_cd_com, data.cod_loc, "
-                    + "data.orden_manz, data.cod_ac, data.t_viv_ocu, data.t_viv_des, data.total_viv, data.total_pob, "
+                    + "data.orden_manz, data.cod_ac, data.t_viv_ocu, data.t_viv_des, data.t_viv_col, data.total_viv, data.total_pob, "
                     + "st_astext(data.geom) as geom from \n"
                     + "(select *, st_intersects(st_geomfromtext(:geom, 4326),geom) \n"
                     + "from ad_bol.bolivia_manzano_poligono) as data \n"
@@ -785,6 +785,7 @@ public class AmanzanadoController implements Serializable {
                     w.createCell(9).setCellStyle(newCellStyle);
                     w.createCell(10).setCellStyle(newCellStyle);
                     w.createCell(11).setCellStyle(newCellStyle);
+                    w.createCell(12).setCellStyle(newCellStyle);
                 }
                 // values [string data]
                 w.getCell(0).setCellValue(toString(rec.get("id_manz")));
@@ -799,8 +800,9 @@ public class AmanzanadoController implements Serializable {
                 // Double or number data sample
                 setNumber(w.getCell(8), rec.get("t_viv_ocu"));
                 setNumber(w.getCell(9), rec.get("t_viv_des"));
-                setNumber(w.getCell(10), rec.get("total_viv"));
-                setNumber(w.getCell(11), rec.get("total_pob"));
+                setNumber(w.getCell(10), rec.get("t_viv_col"));
+                setNumber(w.getCell(11), rec.get("total_viv"));
+                setNumber(w.getCell(12), rec.get("total_pob"));
 
                 i++;
             }
